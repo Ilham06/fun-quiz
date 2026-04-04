@@ -35,7 +35,7 @@ export async function PATCH(request, { params }) {
   const body = await request.json()
   const supabase = createServerClient()
 
-  const allowed = ['title', 'description', 'type', 'is_active']
+  const allowed = ['title', 'description', 'type', 'is_active', 'theme']
   const updates = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   )

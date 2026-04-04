@@ -3,16 +3,10 @@ import { createServerClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
 
-const TYPE_LABELS = {
-  quiz: 'Quiz',
-  feedback: 'Feedback',
-  qa: 'Tanya Jawab',
-}
-
-const TYPE_COLORS = {
-  quiz: 'bg-violet-100 text-violet-700',
-  feedback: 'bg-emerald-100 text-emerald-700',
-  qa: 'bg-amber-100 text-amber-700',
+const TYPE_META = {
+  quiz: { label: 'Quiz', color: 'bg-purple-500/15 text-purple-300 border-purple-500/20' },
+  feedback: { label: 'Feedback', color: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' },
+  qa: { label: 'Tanya Jawab', color: 'bg-amber-500/15 text-amber-300 border-amber-500/20' },
 }
 
 export default async function DashboardPage() {
@@ -25,71 +19,81 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0f0a1e]">
+      <header className="border-b border-white/5">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🎯</span>
-            <h1 className="text-xl font-bold text-gray-900">Fun Quiz</h1>
-            <span className="text-sm text-gray-400 ml-1">Dashboard</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs">
+              Q
+            </div>
+            <span className="text-white font-bold tracking-tight">funquiz</span>
+            <span className="text-white/20 text-sm font-medium ml-1">/ dashboard</span>
           </div>
           <LogoutButton />
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Sesi Quiz</h2>
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Sesi Anda</h1>
+            <p className="text-white/40 text-sm mt-1">Kelola quiz, feedback, dan tanya jawab</p>
+          </div>
           <Link
             href="/dashboard/sessions/new"
-            className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors flex items-center gap-2"
+            className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
           >
-            <span>+</span> Buat Sesi Baru
+            + Buat Sesi
           </Link>
         </div>
 
         {!sessions || sessions.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            <div className="text-5xl mb-4">📋</div>
-            <p className="text-lg">Belum ada sesi quiz.</p>
-            <p className="text-sm mt-1">Buat sesi pertama Anda!</p>
+          <div className="text-center py-24">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">📋</span>
+            </div>
+            <p className="text-white/50 font-medium">Belum ada sesi.</p>
+            <p className="text-white/25 text-sm mt-1">Buat sesi pertama untuk memulai.</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sessions.map((session) => (
-              <Link
-                key={session.id}
-                href={`/dashboard/sessions/${session.id}`}
-                className="bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-md hover:border-violet-200 transition-all group"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${TYPE_COLORS[session.type] || 'bg-gray-100 text-gray-600'}`}
-                  >
-                    {TYPE_LABELS[session.type] || session.type}
-                  </span>
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${session.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
-                  >
-                    {session.is_active ? 'Aktif' : 'Nonaktif'}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-violet-700 transition-colors mb-1">
-                  {session.title}
-                </h3>
-                {session.description && (
-                  <p className="text-sm text-gray-500 line-clamp-2">
-                    {session.description}
-                  </p>
-                )}
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="font-mono text-sm bg-gray-100 px-2 py-0.5 rounded-lg text-gray-600">
-                    {session.code}
-                  </span>
-                  <span className="text-xs text-gray-400">kode bergabung</span>
-                </div>
-              </Link>
-            ))}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {sessions.map((session, i) => {
+              const meta = TYPE_META[session.type] || TYPE_META.quiz
+              return (
+                <Link
+                  key={session.id}
+                  href={`/dashboard/sessions/${session.id}`}
+                  className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/10 rounded-2xl p-5 transition-all"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${meta.color}`}>
+                      {meta.label}
+                    </span>
+                    {session.is_active && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                        LIVE
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
+                    {session.title}
+                  </h3>
+                  {session.description && (
+                    <p className="text-white/30 text-sm line-clamp-2 mt-1">{session.description}</p>
+                  )}
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="font-mono text-xs bg-white/5 text-white/50 px-2 py-1 rounded-lg tracking-widest">
+                      {session.code}
+                    </span>
+                    <span className="text-white/20 text-xs">
+                      {new Date(session.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         )}
       </main>

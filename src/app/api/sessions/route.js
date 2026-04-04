@@ -36,7 +36,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { title, description, type } = await request.json()
+  const { title, description, type, theme } = await request.json()
 
   if (!title?.trim()) {
     return NextResponse.json({ error: 'Judul wajib diisi.' }, { status: 400 })
@@ -59,7 +59,7 @@ export async function POST(request) {
 
   const { data, error } = await supabase
     .from('sessions')
-    .insert({ title: title.trim(), description, type: type || 'quiz', code })
+    .insert({ title: title.trim(), description, type: type || 'quiz', theme: theme || 'default', code })
     .select()
     .single()
 

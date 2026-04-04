@@ -1,98 +1,159 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { createBrowserClient } from '@/lib/supabase/client'
 
-export default function LiveAnswers({ sessionId, initialAnswers = [] }) {
-  const [answers, setAnswers] = useState(initialAnswers)
+const SOUND_URL = 'data:audio/wav;base64,UklGRlQFAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTAFAACAgICAgICAgICAgICAgICAgICAgICBhY2YqbS+xMnL0M7NzcrHxL60pZWJgX15eHl+hpCdrbnEzNDTz8jBuK2hl4uDfnt8f4eSn6y4xM3T1dHLxLqwnJCGf3x8gIqWo7C7xc7U1dHKwrisnpKIgX1+goqVoq67xc7T1dHKwbisnpKIgX1+goqVoq67xc7T1dHKwbesnpKIgH1+goqVoq67xc7T1dDKwbisnpKIgH1+goqVoq67xc7T1dDJwbisnpKIgH1+goqV'
+
+export default function LiveAnswers({ sessionId, questionId = null, initialAnswers = [], showLikes = false, compact = false }) {
+  const [answers, setAnswers] = useState(() =>
+    [...initialAnswers].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+  )
   const [connected, setConnected] = useState(false)
   const [newIds, setNewIds] = useState(new Set())
-  const bottomRef = useRef(null)
+  const [likedIds, setLikedIds] = useState(new Set())
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const containerRef = useRef(null)
   const supabase = createBrowserClient()
+  const audioRef = useRef(null)
+
+  useEffect(() => {
+    audioRef.current = new Audio(SOUND_URL)
+    audioRef.current.volume = 0.3
+  }, [])
+
+  const playSound = useCallback(() => {
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
+    }
+  }, [soundEnabled])
 
   useEffect(() => {
     const channel = supabase
       .channel(`answers:${sessionId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'answers',
-          filter: `session_id=eq.${sessionId}`,
-        },
-        (payload) => {
-          const newAnswer = payload.new
-          setAnswers((prev) => [newAnswer, ...prev])
-          setNewIds((prev) => {
-            const next = new Set(prev)
-            next.add(newAnswer.id)
-            setTimeout(() => {
-              setNewIds((p) => {
-                const n = new Set(p)
-                n.delete(newAnswer.id)
-                return n
-              })
-            }, 2000)
-            return next
-          })
-        }
-      )
-      .subscribe((status) => {
-        setConnected(status === 'SUBSCRIBED')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'answers',
+        filter: `session_id=eq.${sessionId}`,
+      }, (payload) => {
+        const newAnswer = payload.new
+        const matchesQuestion = questionId
+          ? newAnswer.question_id === questionId
+          : newAnswer.question_id === null
+        if (!matchesQuestion) return
+        setAnswers((prev) => {
+          const updated = [newAnswer, ...prev]
+          return updated.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+        })
+        playSound()
+        setNewIds((prev) => {
+          const next = new Set(prev)
+          next.add(newAnswer.id)
+          setTimeout(() => {
+            setNewIds((p) => { const n = new Set(p); n.delete(newAnswer.id); return n })
+          }, 2500)
+          return next
+        })
       })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'answers',
+        filter: `session_id=eq.${sessionId}`,
+      }, (payload) => {
+        const updated = payload.new
+        setAnswers((prev) => {
+          const next = prev.map((a) => a.id === updated.id ? { ...a, upvotes: updated.upvotes } : a)
+          return next.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+        })
+      })
+      .subscribe((status) => setConnected(status === 'SUBSCRIBED'))
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [sessionId, supabase])
+    return () => { supabase.removeChannel(channel) }
+  }, [sessionId, questionId, supabase, playSound])
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [answers.length])
+  async function handleLike(id) {
+    if (likedIds.has(id)) return
+    setLikedIds((prev) => new Set(prev).add(id))
+    setAnswers((prev) => {
+      const next = prev.map((a) => a.id === id ? { ...a, upvotes: (a.upvotes || 0) + 1 } : a)
+      return next.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+    })
+    await fetch(`/api/answers/${id}/upvote`, { method: 'POST' })
+  }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 mb-4">
-        <span
-          className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-gray-300'}`}
-        />
-        <span className="text-sm text-white/60">
-          {connected ? 'Live' : 'Menghubungkan...'}
-        </span>
-        <span className="ml-auto text-sm text-white/60">
-          {answers.length} jawaban
-        </span>
-      </div>
+      {!compact && (
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-white/20'}`} />
+            <span className="text-xs text-white/30 font-medium">{connected ? 'Live' : 'Connecting...'}</span>
+          </div>
+          <span className="text-xs text-white/20">{answers.length} jawaban</span>
+          <button
+            onClick={() => setSoundEnabled((v) => !v)}
+            className="ml-auto text-xs text-white/20 hover:text-white/40 transition-colors"
+            title={soundEnabled ? 'Matikan suara' : 'Nyalakan suara'}
+          >
+            {soundEnabled ? '🔔' : '🔕'}
+          </button>
+        </div>
+      )}
 
       {answers.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-white/40 text-lg">
-          Menunggu jawaban pertama...
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 py-8">
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center">
+            <span className="text-white/20 text-lg">?</span>
+          </div>
+          <p className="text-white/20 text-sm">Menunggu jawaban...</p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-          {answers.map((a) => (
-            <div
-              key={a.id}
-              className={`rounded-2xl px-5 py-4 transition-all duration-500 ${
-                newIds.has(a.id)
-                  ? 'bg-violet-500 scale-105 shadow-lg shadow-violet-900/30'
-                  : 'bg-white/10'
-              }`}
-            >
-              <p className="text-white text-lg font-medium leading-snug">
-                {a.content}
-              </p>
-              <p className="text-white/50 text-sm mt-1.5">
-                {a.student_name || 'Anonim'} &middot;{' '}
-                {new Date(a.created_at).toLocaleTimeString('id-ID', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}
-              </p>
-            </div>
-          ))}
-          <div ref={bottomRef} />
+        <div ref={containerRef} className={`flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin ${compact ? 'max-h-[40vh]' : ''}`}>
+          {answers.map((a, idx) => {
+            const likes = a.upvotes || 0
+            const isTop = idx === 0 && likes > 0
+            const liked = likedIds.has(a.id)
+            return (
+              <div
+                key={a.id}
+                className={`rounded-2xl px-4 py-3 transition-all duration-700 ${
+                  newIds.has(a.id)
+                    ? 'bg-purple-500/30 border border-purple-400/30 animate-slide-in-right'
+                    : isTop
+                      ? 'bg-gradient-to-r from-rose-500/15 to-pink-500/10 border border-rose-400/20'
+                      : 'bg-white/[0.04] border border-white/[0.04]'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-white font-medium leading-snug ${compact ? 'text-sm' : 'text-base'}`}>{a.content}</p>
+                    <p className="text-white/30 text-xs mt-1">
+                      {a.student_name || 'Anonim'}
+                      {!compact && ` · ${new Date(a.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`}
+                    </p>
+                  </div>
+                  {showLikes && (
+                    <button
+                      onClick={() => handleLike(a.id)}
+                      disabled={liked}
+                      className={`flex items-center gap-1 shrink-0 px-2 py-1 rounded-full text-xs font-semibold transition-all ${
+                        liked
+                          ? 'bg-rose-500/20 text-rose-400'
+                          : 'bg-white/[0.04] text-white/30 hover:bg-rose-500/10 hover:text-rose-400'
+                      }`}
+                    >
+                      <span className={`transition-transform ${liked ? 'scale-125' : 'group-hover:scale-110'}`}>
+                        {liked ? '❤️' : '🤍'}
+                      </span>
+                      {likes > 0 && <span>{likes}</span>}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

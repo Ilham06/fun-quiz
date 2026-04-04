@@ -32,20 +32,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-indigo-100">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-[#1a1035] flex items-center justify-center relative">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-purple-600/15 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-indigo-600/10 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm mx-4">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🎯</div>
-          <h1 className="text-2xl font-bold text-gray-900">Fun Quiz</h1>
-          <p className="text-gray-500 mt-1">Login sebagai pengajar</p>
+          <Link href="/" className="inline-flex items-center gap-2 mb-6 group">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg shadow-purple-500/25">
+              Q
+            </div>
+            <span className="text-white/60 font-bold text-sm group-hover:text-white/80 transition-colors">funquiz</span>
+          </Link>
+          <h1 className="text-2xl font-bold text-white">Login Pengajar</h1>
+          <p className="text-white/40 text-sm mt-1">Kelola sesi quiz dan feedback</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 space-y-4">
           <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="username" className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
               Username
             </label>
             <input
@@ -54,16 +61,13 @@ export default function LoginPage() {
               type="text"
               required
               autoComplete="username"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent text-gray-900"
-              placeholder="Masukkan username"
+              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-purple-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
+              placeholder="admin"
             />
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="password" className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
               Password
             </label>
             <input
@@ -72,30 +76,27 @@ export default function LoginPage() {
               type="password"
               required
               autoComplete="current-password"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent text-gray-900"
-              placeholder="Masukkan password"
+              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-purple-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
+              placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3">
-              {error}
-            </div>
+            <p className="text-red-400 text-sm animate-fade-up">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
+            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all"
           >
-            {loading ? 'Memproses...' : 'Login'}
+            {loading ? 'Memproses...' : 'Masuk'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
-          Kembali ke{' '}
-          <Link href="/" className="text-violet-600 hover:underline">
-            halaman utama
+        <p className="text-center text-white/25 text-xs mt-6">
+          <Link href="/" className="hover:text-white/50 transition-colors">
+            Kembali ke halaman utama
           </Link>
         </p>
       </div>
