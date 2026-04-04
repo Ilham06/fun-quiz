@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
 
-export default function QuestionManager({ sessionId, initialQuestions = [] }) {
+export default function QuestionManager({ sessionId, initialQuestions = [], sessionType = 'quiz' }) {
+  const isExam = sessionType === 'exam'
   const [questions, setQuestions] = useState(initialQuestions)
   const [showForm, setShowForm] = useState(false)
   const [newText, setNewText] = useState('')
@@ -91,8 +92,8 @@ export default function QuestionManager({ sessionId, initialQuestions = [] }) {
         </button>
       </div>
 
-      {/* Presentation nav */}
-      {questions.length > 1 && (
+      {/* Presentation nav (quiz only, not exam) */}
+      {!isExam && questions.length > 1 && (
         <div className="flex items-center gap-2 mb-3">
           <button
             onClick={() => navigateQuestion('prev')}
@@ -110,6 +111,12 @@ export default function QuestionManager({ sessionId, initialQuestions = [] }) {
             Next →
           </button>
         </div>
+      )}
+
+      {isExam && questions.length > 0 && (
+        <p className="text-white/30 text-xs mb-3">
+          Mahasiswa akan mengerjakan {questions.length} soal secara berurutan.
+        </p>
       )}
 
       {showForm && (
@@ -194,7 +201,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [] }) {
             <div
               key={q.id}
               className={`rounded-xl border p-3 flex items-start gap-3 transition-all ${
-                q.is_active
+                !isExam && q.is_active
                   ? 'border-purple-500/30 bg-purple-500/10'
                   : 'border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]'
               }`}
@@ -209,22 +216,24 @@ export default function QuestionManager({ sessionId, initialQuestions = [] }) {
                   {q.timer_seconds > 0 && (
                     <span className="text-[10px] text-amber-400/60">⏱ {q.timer_seconds}s</span>
                   )}
-                  {q.is_active && (
+                  {!isExam && q.is_active && (
                     <span className="text-[10px] bg-purple-500 text-white px-1.5 py-0.5 rounded-full font-bold">AKTIF</span>
                   )}
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                <button
-                  onClick={() => activateQuestion(q.id)}
-                  className={`text-[10px] px-2 py-1 rounded-lg font-bold transition-colors ${
-                    q.is_active
-                      ? 'bg-purple-500 text-white hover:bg-purple-400'
-                      : 'bg-white/5 text-white/30 hover:text-white/60 hover:bg-white/10'
-                  }`}
-                >
-                  {q.is_active ? 'ON' : 'OFF'}
-                </button>
+                {!isExam && (
+                  <button
+                    onClick={() => activateQuestion(q.id)}
+                    className={`text-[10px] px-2 py-1 rounded-lg font-bold transition-colors ${
+                      q.is_active
+                        ? 'bg-purple-500 text-white hover:bg-purple-400'
+                        : 'bg-white/5 text-white/30 hover:text-white/60 hover:bg-white/10'
+                    }`}
+                  >
+                    {q.is_active ? 'ON' : 'OFF'}
+                  </button>
+                )}
                 <button
                   onClick={() => deleteQuestion(q.id)}
                   className="text-[10px] px-1.5 py-1 rounded-lg text-red-400/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"

@@ -1,6 +1,10 @@
 -- Migration: add new columns and tables for v2 features
 -- Run this if you already ran the original schema.sql
 
+-- Add 'exam' to sessions type check constraint
+alter table sessions drop constraint if exists sessions_type_check;
+alter table sessions add constraint sessions_type_check check (type in ('quiz', 'exam', 'feedback', 'qa'));
+
 -- Add new columns to sessions
 alter table sessions add column if not exists theme text not null default 'default';
 
@@ -37,5 +41,13 @@ begin
   end if;
 end $$;
 
--- Enable Realtime for reactions (answers should already be enabled)
-alter publication supabase_realtime add table reactions;
+-- Enable Realtime for reactions (skip if already added)
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and tablename = 'reactions'
+  ) then
+    alter publication supabase_realtime add table reactions;
+  end if;
+end $$;

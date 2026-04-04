@@ -8,6 +8,7 @@ import LogoutButton from '@/components/LogoutButton'
 
 const TYPE_META = {
   quiz: { label: 'Quiz', icon: '🧠' },
+  exam: { label: 'Ujian', icon: '📝' },
   feedback: { label: 'Feedback', icon: '💬' },
   qa: { label: 'Tanya Jawab', icon: '🙋' },
 }
@@ -32,12 +33,17 @@ export default async function SessionDetailPage({ params }) {
     .eq('session_id', id)
     .order('order', { ascending: true })
 
-  const { data: answers } = await supabase
+  let answersQuery = supabase
     .from('answers')
     .select('*')
     .eq('session_id', id)
     .order('created_at', { ascending: false })
-    .limit(50)
+
+  if (session.type !== 'exam') {
+    answersQuery = answersQuery.limit(50)
+  }
+
+  const { data: answers } = await answersQuery
 
   const meta = TYPE_META[session.type] || TYPE_META.quiz
 
@@ -93,7 +99,7 @@ export default async function SessionDetailPage({ params }) {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Questions */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
-            <QuestionManager sessionId={id} initialQuestions={questions || []} />
+            <QuestionManager sessionId={id} initialQuestions={questions || []} sessionType={session.type} />
           </div>
 
           {/* Answers preview */}
@@ -106,6 +112,37 @@ export default async function SessionDetailPage({ params }) {
             </div>
             {!answers || answers.length === 0 ? (
               <p className="text-white/25 text-sm py-8 text-center">Belum ada jawaban.</p>
+            ) : session.type === 'exam' ? (
+              <div className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin">
+                {(questions || []).map((q, qi) => {
+                  const qAnswers = answers.filter(a => a.question_id === q.id)
+                  return (
+                    <div key={q.id}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                          Soal {qi + 1}
+                        </span>
+                        <span className="text-white/30 text-xs truncate">{q.text}</span>
+                        <span className="text-white/20 text-xs ml-auto shrink-0">{qAnswers.length} jawaban</span>
+                      </div>
+                      {qAnswers.length === 0 ? (
+                        <p className="text-white/15 text-xs pl-2 mb-2">Belum ada jawaban.</p>
+                      ) : (
+                        <div className="space-y-1.5 mb-2">
+                          {qAnswers.map((a) => (
+                            <div key={a.id} className="bg-white/[0.04] rounded-xl px-3.5 py-2.5">
+                              <p className="text-white/90 text-sm">{a.content}</p>
+                              <p className="text-white/30 text-xs mt-1">
+                                {a.student_name || 'Anonim'} · {new Date(a.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             ) : (
               <div className="space-y-2 max-h-[420px] overflow-y-auto scrollbar-thin">
                 {answers.map((a) => (

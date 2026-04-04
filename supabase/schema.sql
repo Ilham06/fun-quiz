@@ -7,7 +7,7 @@ create table if not exists sessions (
   title text not null,
   description text,
   code text not null unique,
-  type text not null default 'quiz' check (type in ('quiz', 'feedback', 'qa')),
+  type text not null default 'quiz' check (type in ('quiz', 'exam', 'feedback', 'qa')),
   theme text not null default 'default',
   is_active boolean not null default false,
   created_at timestamptz not null default now()

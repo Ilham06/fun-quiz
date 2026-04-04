@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 const SESSION_TYPES = [
   { value: 'quiz', label: 'Quiz', icon: '🧠', desc: 'Pertanyaan & jawaban' },
+  { value: 'exam', label: 'Ujian', icon: '📝', desc: 'Soal berurutan, mahasiswa mengerjakan sendiri' },
   { value: 'feedback', label: 'Feedback', icon: '💬', desc: 'Pesan, kesan, kritik, saran' },
   { value: 'qa', label: 'Tanya Jawab', icon: '🙋', desc: 'Q&A interaktif' },
 ]
@@ -99,7 +100,7 @@ export default function NewSessionPage() {
           {/* Session Type */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
             <p className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Jenis Sesi</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {SESSION_TYPES.map((t) => (
                 <button
                   key={t.value}
