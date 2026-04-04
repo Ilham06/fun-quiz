@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SessionControls from '@/components/SessionControls'
 import QuestionManager from '@/components/QuestionManager'
 import LogoutButton from '@/components/LogoutButton'
+import ViolationsPanel from '@/components/ViolationsPanel'
 
 const TYPE_META = {
   quiz: { label: 'Quiz', icon: '🧠' },
@@ -44,6 +45,16 @@ export default async function SessionDetailPage({ params }) {
   }
 
   const { data: answers } = await answersQuery
+
+  let violations = []
+  if (session.type === 'exam') {
+    const { data: v } = await supabase
+      .from('tab_violations')
+      .select('*')
+      .eq('session_id', id)
+      .order('created_at', { ascending: false })
+    violations = v || []
+  }
 
   const meta = TYPE_META[session.type] || TYPE_META.quiz
 
@@ -95,6 +106,10 @@ export default async function SessionDetailPage({ params }) {
             <SessionControls sessionId={id} initialActive={session.is_active} />
           </div>
         </div>
+
+        {session.type === 'exam' && violations.length > 0 && (
+          <ViolationsPanel violations={violations} questions={questions || []} />
+        )}
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Questions */}

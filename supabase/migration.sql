@@ -41,6 +41,35 @@ begin
   end if;
 end $$;
 
+-- Tab violations table (anti-cheat)
+create table if not exists tab_violations (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references sessions(id) on delete cascade,
+  question_id uuid references questions(id) on delete set null,
+  student_name text,
+  left_at timestamptz not null,
+  returned_at timestamptz,
+  duration_seconds numeric,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_tab_violations_session_id on tab_violations(session_id);
+
+alter table tab_violations enable row level security;
+
+do $$
+begin
+  if not exists (select 1 from pg_policies where tablename = 'tab_violations' and policyname = 'Anyone can insert tab_violations') then
+    create policy "Anyone can insert tab_violations" on tab_violations for insert with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'tab_violations' and policyname = 'Anyone can read tab_violations') then
+    create policy "Anyone can read tab_violations" on tab_violations for select using (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'tab_violations' and policyname = 'Anyone can update tab_violations') then
+    create policy "Anyone can update tab_violations" on tab_violations for update using (true) with check (true);
+  end if;
+end $$;
+
 -- Enable Realtime for reactions (skip if already added)
 do $$
 begin

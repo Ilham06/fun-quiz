@@ -46,18 +46,32 @@ create table if not exists reactions (
   created_at timestamptz not null default now()
 );
 
+-- Tab violations table (anti-cheat: detects tab switching during exams)
+create table if not exists tab_violations (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references sessions(id) on delete cascade,
+  question_id uuid references questions(id) on delete set null,
+  student_name text,
+  left_at timestamptz not null,
+  returned_at timestamptz,
+  duration_seconds numeric,
+  created_at timestamptz not null default now()
+);
+
 -- Indexes
 create index if not exists idx_questions_session_id on questions(session_id);
 create index if not exists idx_answers_session_id on answers(session_id);
 create index if not exists idx_answers_question_id on answers(question_id);
 create index if not exists idx_sessions_code on sessions(code);
 create index if not exists idx_reactions_session_id on reactions(session_id);
+create index if not exists idx_tab_violations_session_id on tab_violations(session_id);
 
 -- Enable Row Level Security (RLS)
 alter table sessions enable row level security;
 alter table questions enable row level security;
 alter table answers enable row level security;
 alter table reactions enable row level security;
+alter table tab_violations enable row level security;
 
 -- RLS Policies
 create policy "Anyone can read active sessions" on sessions
@@ -80,6 +94,15 @@ create policy "Anyone can insert reactions" on reactions
 
 create policy "Anyone can read reactions" on reactions
   for select using (true);
+
+create policy "Anyone can insert tab_violations" on tab_violations
+  for insert with check (true);
+
+create policy "Anyone can read tab_violations" on tab_violations
+  for select using (true);
+
+create policy "Anyone can update tab_violations" on tab_violations
+  for update using (true) with check (true);
 
 -- Enable Realtime
 alter publication supabase_realtime add table answers;

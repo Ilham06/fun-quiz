@@ -1,5 +1,100 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+
+function TabWarningBanner({ count }) {
+  if (count === 0) return null
+  return (
+    <div className="bg-red-500/15 border border-red-500/30 rounded-2xl p-4 animate-fade-up">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center shrink-0">
+          <span className="text-xl">⚠️</span>
+        </div>
+        <div>
+          <p className="text-red-300 font-semibold text-sm">
+            Terdeteksi meninggalkan halaman {count}x
+          </p>
+          <p className="text-red-300/60 text-xs mt-0.5">
+            Aktivitas ini tercatat dan akan dilaporkan ke pengajar.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function useTabDetection({ sessionId, studentName, questionId, enabled }) {
+  const [violationCount, setViolationCount] = useState(0)
+  const leftAtRef = useRef(null)
+
+  useEffect(() => {
+    if (!enabled) return
+
+    const savedCount = sessionStorage.getItem(`exam-${sessionId}-violations`)
+    if (savedCount) setViolationCount(parseInt(savedCount) || 0)
+  }, [enabled, sessionId])
+
+  useEffect(() => {
+    if (!enabled) return
+
+    function reportViolation(leftAt, returnedAt) {
+      const durationSeconds = (returnedAt - leftAt) / 1000
+      if (durationSeconds < 0.5) return
+
+      setViolationCount(prev => {
+        const next = prev + 1
+        sessionStorage.setItem(`exam-${sessionId}-violations`, String(next))
+        return next
+      })
+
+      fetch('/api/tab-violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          question_id: questionId || null,
+          student_name: studentName || null,
+          left_at: new Date(leftAt).toISOString(),
+          returned_at: new Date(returnedAt).toISOString(),
+          duration_seconds: Math.round(durationSeconds * 10) / 10,
+        }),
+      }).catch(() => {})
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        leftAtRef.current = Date.now()
+      } else if (leftAtRef.current) {
+        reportViolation(leftAtRef.current, Date.now())
+        leftAtRef.current = null
+      }
+    }
+
+    function handleBlur() {
+      if (!leftAtRef.current) {
+        leftAtRef.current = Date.now()
+      }
+    }
+
+    function handleFocus() {
+      if (leftAtRef.current) {
+        reportViolation(leftAtRef.current, Date.now())
+        leftAtRef.current = null
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('blur', handleBlur)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('blur', handleBlur)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [enabled, sessionId, studentName, questionId])
+
+  return violationCount
+}
 
 function ExamTimer({ timerSeconds, onExpired }) {
   const [elapsed, setElapsed] = useState(0)
@@ -49,6 +144,13 @@ export default function ExamFlow({ session, questions, theme }) {
   const currentQuestion = questions[currentIndex] || null
   const isFinished = currentIndex >= questions.length
   const totalQuestions = questions.length
+
+  const violationCount = useTabDetection({
+    sessionId: session.id,
+    studentName: name,
+    questionId: currentQuestion?.id,
+    enabled: started && !isFinished,
+  })
 
   useEffect(() => {
     const saved = sessionStorage.getItem(`exam-${session.id}-name`)
@@ -225,21 +327,32 @@ export default function ExamFlow({ session, questions, theme }) {
 
   if (isFinished) {
     return (
-      <div className="text-center py-16 animate-fade-up">
-        <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <span className="text-4xl">✅</span>
+      <div className="space-y-4 animate-fade-up">
+        <div className="text-center py-16">
+          <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <span className="text-4xl">✅</span>
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Ujian Selesai!</h2>
+          <p className="text-white/50 text-sm mb-1">
+            Kamu telah menjawab {answeredIds.size} dari {totalQuestions} soal.
+          </p>
+          <p className="text-white/30 text-sm">Terima kasih, {name}.</p>
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Ujian Selesai!</h2>
-        <p className="text-white/50 text-sm mb-1">
-          Kamu telah menjawab {answeredIds.size} dari {totalQuestions} soal.
-        </p>
-        <p className="text-white/30 text-sm">Terima kasih, {name}.</p>
+        {violationCount > 0 && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
+            <p className="text-red-300/80 text-sm">
+              Kamu tercatat meninggalkan halaman <span className="font-bold text-red-300">{violationCount}x</span> selama ujian.
+            </p>
+          </div>
+        )}
       </div>
     )
   }
 
   return (
     <div className="space-y-4 animate-fade-up">
+      <TabWarningBanner count={violationCount} />
+
       {/* Progress bar */}
       <div className="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
