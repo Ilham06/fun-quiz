@@ -7,8 +7,8 @@ export default function QRCode({ code }) {
     : `/quiz/${code}`
 
   return (
-    <div className="bg-white rounded-2xl p-3 inline-block">
+    <a href={url} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl p-3 inline-block cursor-pointer hover:scale-105 transition-transform">
       <QRCodeSVG value={url} size={120} level="M" />
-    </div>
+    </a>
   )
 }
