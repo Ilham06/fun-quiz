@@ -132,7 +132,7 @@ export default function DisplayClient({ session, activeQuestion, initialAnswers,
 
       <footer className="px-8 py-2 flex items-center justify-between relative z-10 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-md flex items-center justify-center text-white font-black text-[8px]">Q</div>
+          <div className="w-5 h-5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-md flex items-center justify-center text-white font-black text-[8px]">Q</div>
           <span className="text-white/15 text-xs font-bold">funquiz</span>
         </div>
         <p className="text-white/15 text-xs">

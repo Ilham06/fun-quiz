@@ -4,8 +4,8 @@ import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
 
 const TYPE_META = {
-  quiz: { label: 'Quiz', color: 'bg-purple-500/15 text-purple-300 border-purple-500/20' },
-  exam: { label: 'Ujian', color: 'bg-blue-500/15 text-blue-300 border-blue-500/20' },
+                  quiz: { label: 'Quiz', color: 'bg-amber-500/15 text-amber-300 border-amber-500/20' },
+  exam: { label: 'Ujian', color: 'bg-orange-500/15 text-orange-300 border-orange-500/20' },
   feedback: { label: 'Feedback', color: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' },
   qa: { label: 'Tanya Jawab', color: 'bg-amber-500/15 text-amber-300 border-amber-500/20' },
 }
@@ -20,11 +20,11 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-[#141005]">
       <header className="border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center text-white font-black text-xs">
               Q
             </div>
             <span className="text-white font-bold tracking-tight">funquiz</span>
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
           </div>
           <Link
             href="/dashboard/sessions/new"
-            className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
+            className="bg-amber-500 hover:bg-amber-400 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
           >
             + Buat Sesi
           </Link>
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
                       </span>
                     )}
                   </div>
-                  <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
+                  <h3 className="font-semibold text-white group-hover:text-amber-300 transition-colors line-clamp-1">
                     {session.title}
                   </h3>
                   {session.description && (

@@ -122,7 +122,7 @@ function ExamTimer({ timerSeconds, onExpired }) {
       </div>
       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-1000 ease-linear"
+          className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full transition-all duration-1000 ease-linear"
           style={{ width: `${(timeLeft / timerSeconds) * 100}%` }}
         />
       </div>
@@ -310,13 +310,13 @@ export default function ExamFlow({ session, questions, theme }) {
               onChange={(e) => setName(e.target.value)}
               required
               maxLength={50}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-400 focus:outline-none text-white placeholder:text-white/20"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/20"
               placeholder="Masukkan nama lengkap kamu"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
+            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
           >
             Mulai Ujian
           </button>
@@ -363,7 +363,7 @@ export default function ExamFlow({ session, questions, theme }) {
         </div>
         <div className="h-2 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full transition-all duration-500"
             style={{ width: `${((currentIndex) / totalQuestions) * 100}%` }}
           />
         </div>
@@ -372,7 +372,7 @@ export default function ExamFlow({ session, questions, theme }) {
       {/* Question */}
       <div className="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
             Soal {currentIndex + 1}
           </span>
           {currentQuestion.type === 'multiple_choice' && (
@@ -410,7 +410,7 @@ export default function ExamFlow({ session, questions, theme }) {
                 disabled={timerExpired}
                 className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all disabled:opacity-40 ${
                   selectedOption === opt
-                    ? 'border-blue-400 bg-blue-500/20 text-white'
+                    ? 'border-amber-400 bg-amber-500/20 text-white'
                     : 'border-white/10 hover:border-white/20 text-white/80'
                 }`}
               >
@@ -427,7 +427,7 @@ export default function ExamFlow({ session, questions, theme }) {
             required
             disabled={timerExpired}
             maxLength={500}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-400 focus:outline-none text-white resize-none placeholder:text-white/20 disabled:opacity-40"
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white resize-none placeholder:text-white/20 disabled:opacity-40"
             placeholder="Tulis jawabanmu..."
           />
         )}
@@ -437,7 +437,7 @@ export default function ExamFlow({ session, questions, theme }) {
         <button
           type="submit"
           disabled={loading || timerExpired}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-30 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
+          className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-30 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
         >
           {loading ? 'Mengirim...' : currentIndex < totalQuestions - 1 ? 'Jawab & Lanjut' : 'Jawab & Selesai'}
         </button>

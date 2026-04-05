@@ -2,7 +2,7 @@
 import { useMemo } from 'react'
 
 const BAR_COLORS = [
-  'from-purple-500 to-indigo-500',
+  'from-amber-500 to-yellow-500',
   'from-pink-500 to-rose-500',
   'from-cyan-500 to-blue-500',
   'from-amber-500 to-orange-500',

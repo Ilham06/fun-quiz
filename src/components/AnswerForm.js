@@ -28,7 +28,7 @@ function AnswerTimer({ timerSeconds, questionId, onExpired }) {
         </div>
         <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-1000 ease-linear"
+            className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full transition-all duration-1000 ease-linear"
             style={{ width: `${(timeLeft / timerSeconds) * 100}%` }}
           />
         </div>
@@ -96,7 +96,7 @@ export default function AnswerForm({ session, activeQuestion }) {
         <p className="text-white/40 text-sm">Terima kasih, {isAnon ? 'Anonim' : name || 'teman'}.</p>
         <button
           onClick={() => { setSubmitted(false); setContent(''); setSelectedOption(null); setTimerExpired(false) }}
-          className="mt-5 text-xs text-purple-400 hover:text-purple-300 font-medium"
+          className="mt-5 text-xs text-amber-400 hover:text-amber-300 font-medium"
         >
           Kirim lagi
         </button>
@@ -123,7 +123,7 @@ export default function AnswerForm({ session, activeQuestion }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white text-sm placeholder:text-white/20"
+            className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm placeholder:text-white/20"
             placeholder="Nama kamu"
           />
         )}
@@ -151,7 +151,7 @@ export default function AnswerForm({ session, activeQuestion }) {
               disabled={timerExpired}
               className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all disabled:opacity-40 ${
                 selectedOption === opt
-                  ? 'border-purple-400 bg-purple-500/20 text-white'
+                  ? 'border-amber-400 bg-amber-500/20 text-white'
                   : 'border-white/10 hover:border-white/20 text-white/80'
               }`}
             >
@@ -168,7 +168,7 @@ export default function AnswerForm({ session, activeQuestion }) {
           required
           disabled={timerExpired}
           maxLength={500}
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white resize-none placeholder:text-white/20 disabled:opacity-40"
+          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white resize-none placeholder:text-white/20 disabled:opacity-40"
           placeholder={activeQuestion ? 'Tulis jawabanmu...' : 'Tulis pesan atau jawabanmu...'}
         />
       )}
@@ -178,7 +178,7 @@ export default function AnswerForm({ session, activeQuestion }) {
       <button
         type="submit"
         disabled={loading || timerExpired}
-        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-30 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
+        className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-30 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
       >
         {loading ? 'Mengirim...' : 'Kirim'}
       </button>

@@ -32,16 +32,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1035] flex items-center justify-center relative">
+    <div className="min-h-screen bg-[#141005] flex items-center justify-center relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-purple-600/15 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-indigo-600/10 blur-3xl" />
+        <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-amber-500/15 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-yellow-600/10 blur-3xl" />
       </div>
 
       <div className="relative z-10 w-full max-w-sm mx-4">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg shadow-purple-500/25">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg shadow-amber-500/25">
               Q
             </div>
             <span className="text-white/60 font-bold text-sm group-hover:text-white/80 transition-colors">funquiz</span>
@@ -61,7 +61,7 @@ export default function LoginPage() {
               type="text"
               required
               autoComplete="username"
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-purple-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
               placeholder="admin"
             />
           </div>
@@ -76,7 +76,7 @@ export default function LoginPage() {
               type="password"
               required
               autoComplete="current-password"
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-purple-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
               placeholder="••••••••"
             />
           </div>
@@ -88,7 +88,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all"
+            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all"
           >
             {loading ? 'Memproses...' : 'Masuk'}
           </button>

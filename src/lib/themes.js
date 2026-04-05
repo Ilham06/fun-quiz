@@ -1,9 +1,9 @@
 const THEMES = {
   default: {
-    bg: 'from-[#1a1035] via-[#1e1145] to-[#0f0a1e]',
-    accent: 'from-purple-500 to-indigo-600',
-    accentColor: '#8b5cf6',
-    highlight: 'purple',
+    bg: 'from-[#1a1308] via-[#1f1a0a] to-[#141005]',
+    accent: 'from-amber-500 to-yellow-500',
+    accentColor: '#f59e0b',
+    highlight: 'amber',
   },
   ocean: {
     bg: 'from-[#0c1929] via-[#0e2a4a] to-[#071320]',

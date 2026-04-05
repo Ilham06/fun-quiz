@@ -27,19 +27,19 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1035] flex flex-col overflow-hidden relative">
+    <div className="min-h-screen bg-[#141005] flex flex-col overflow-hidden relative">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-purple-600/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-amber-500/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-yellow-600/15 blur-3xl" />
         <div className="absolute top-1/3 left-1/4 w-3 h-3 bg-yellow-400 rounded-full opacity-60" />
-        <div className="absolute top-1/5 right-1/3 w-2 h-2 bg-pink-400 rounded-full opacity-40" />
+        <div className="absolute top-1/5 right-1/3 w-2 h-2 bg-orange-400 rounded-full opacity-40" />
         <div className="absolute bottom-1/3 right-1/4 w-4 h-4 bg-emerald-400 rounded-full opacity-30" />
       </div>
 
       <header className="relative z-10 px-6 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-purple-500/25">
+          <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-amber-500/25">
             Q
           </div>
           <span className="text-white font-bold text-lg tracking-tight">funquiz</span>
@@ -57,7 +57,7 @@ export default function HomePage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
               Masuk ke<br />
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 bg-clip-text text-transparent">
                 Sesi Quiz
               </span>
             </h1>
@@ -79,7 +79,7 @@ export default function HomePage() {
                 required
                 autoComplete="off"
                 spellCheck="false"
-                className="w-full text-center text-3xl font-mono font-black tracking-[0.4em] px-4 py-5 rounded-2xl bg-white/10 border-2 border-white/10 focus:border-purple-400 focus:outline-none focus:bg-white/15 text-white placeholder:text-white/20 transition-all"
+                className="w-full text-center text-3xl font-mono font-black tracking-[0.4em] px-4 py-5 rounded-2xl bg-white/10 border-2 border-white/10 focus:border-amber-400 focus:outline-none focus:bg-white/15 text-white placeholder:text-white/20 transition-all"
                 placeholder="······"
               />
             </div>
@@ -91,7 +91,7 @@ export default function HomePage() {
             <button
               type="submit"
               disabled={loading || code.trim().length < 4}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-30 disabled:hover:from-purple-600 disabled:hover:to-indigo-600 text-white text-lg font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-purple-600/25"
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-30 disabled:hover:from-amber-500 disabled:hover:to-yellow-500 text-white text-lg font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-amber-500/25"
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">

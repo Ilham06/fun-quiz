@@ -86,7 +86,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
         <h3 className="font-semibold text-white text-sm">Pertanyaan</h3>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+          className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
         >
           {showForm ? '✕ Batal' : '+ Tambah'}
         </button>
@@ -120,13 +120,13 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
       )}
 
       {showForm && (
-        <form onSubmit={addQuestion} className="bg-purple-500/5 border border-purple-500/10 rounded-xl p-4 mb-4 space-y-3">
+        <form onSubmit={addQuestion} className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4 mb-4 space-y-3">
           <textarea
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
             rows={2}
             required
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white text-sm resize-none placeholder:text-white/20"
+            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm resize-none placeholder:text-white/20"
             placeholder="Tulis pertanyaan..."
           />
 
@@ -136,7 +136,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
               <select
                 value={newType}
                 onChange={(e) => setNewType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm"
               >
                 <option value="open">Jawaban Bebas</option>
                 <option value="multiple_choice">Pilihan Ganda</option>
@@ -150,7 +150,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                 max={300}
                 value={newTimer}
                 onChange={(e) => setNewTimer(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm"
                 placeholder="0 = tanpa timer"
               />
             </div>
@@ -168,11 +168,11 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                     opts[i] = e.target.value
                     setNewOptions(opts)
                   }}
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white text-sm placeholder:text-white/20"
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm placeholder:text-white/20"
                   placeholder={`Pilihan ${String.fromCharCode(65 + i)}`}
                 />
               ))}
-              <button type="button" onClick={() => setNewOptions([...newOptions, ''])} className="text-xs text-purple-400 hover:underline">
+              <button type="button" onClick={() => setNewOptions([...newOptions, ''])} className="text-xs text-amber-400 hover:underline">
                 + Tambah pilihan
               </button>
             </div>
@@ -185,7 +185,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
+              className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
             >
               {loading ? 'Saving...' : 'Simpan'}
             </button>
@@ -202,7 +202,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
               key={q.id}
               className={`rounded-xl border p-3 flex items-start gap-3 transition-all ${
                 !isExam && q.is_active
-                  ? 'border-purple-500/30 bg-purple-500/10'
+                  ? 'border-amber-500/30 bg-amber-500/10'
                   : 'border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]'
               }`}
             >
@@ -217,7 +217,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                     <span className="text-[10px] text-amber-400/60">⏱ {q.timer_seconds}s</span>
                   )}
                   {!isExam && q.is_active && (
-                    <span className="text-[10px] bg-purple-500 text-white px-1.5 py-0.5 rounded-full font-bold">AKTIF</span>
+                    <span className="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full font-bold">AKTIF</span>
                   )}
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                     onClick={() => activateQuestion(q.id)}
                     className={`text-[10px] px-2 py-1 rounded-lg font-bold transition-colors ${
                       q.is_active
-                        ? 'bg-purple-500 text-white hover:bg-purple-400'
+                        ? 'bg-amber-500 text-white hover:bg-amber-400'
                         : 'bg-white/5 text-white/30 hover:text-white/60 hover:bg-white/10'
                     }`}
                   >

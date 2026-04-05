@@ -59,7 +59,7 @@ export default async function SessionDetailPage({ params }) {
   const meta = TYPE_META[session.type] || TYPE_META.quiz
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-[#141005]">
       <header className="border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export default async function SessionDetailPage({ params }) {
                   href={`/display/${session.code}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/20 rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
+                  className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
                 >
                   Buka Layar Proyektor
                 </a>
@@ -134,7 +134,7 @@ export default async function SessionDetailPage({ params }) {
                   return (
                     <div key={q.id}>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
                           Soal {qi + 1}
                         </span>
                         <span className="text-white/30 text-xs truncate">{q.text}</span>

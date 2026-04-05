@@ -11,7 +11,7 @@ const SESSION_TYPES = [
 ]
 
 const THEMES = [
-  { value: 'default', label: 'Default', gradient: 'from-purple-600 to-indigo-700' },
+  { value: 'default', label: 'Default', gradient: 'from-amber-500 to-yellow-500' },
   { value: 'ocean', label: 'Ocean', gradient: 'from-cyan-600 to-blue-700' },
   { value: 'sunset', label: 'Sunset', gradient: 'from-orange-500 to-rose-600' },
   { value: 'forest', label: 'Forest', gradient: 'from-emerald-600 to-teal-700' },
@@ -52,7 +52,7 @@ export default function NewSessionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-[#141005]">
       <header className="border-b border-white/5">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center gap-3">
           <Link href="/dashboard" className="text-white/30 hover:text-white/60 transition-colors text-sm">
@@ -77,7 +77,7 @@ export default function NewSessionPage() {
                 type="text"
                 required
                 maxLength={100}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white placeholder:text-white/20 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/20 transition-colors"
                 placeholder="Quiz Bab 3, Pesan & Kesan, dll."
               />
             </div>
@@ -91,7 +91,7 @@ export default function NewSessionPage() {
                 name="description"
                 rows={2}
                 maxLength={300}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-400 focus:outline-none text-white placeholder:text-white/20 transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/20 transition-colors resize-none"
                 placeholder="Deskripsi singkat..."
               />
             </div>
@@ -108,7 +108,7 @@ export default function NewSessionPage() {
                   onClick={() => setType(t.value)}
                   className={`p-3 rounded-xl border-2 text-left transition-all ${
                     type === t.value
-                      ? 'border-purple-500 bg-purple-500/10'
+                      ? 'border-amber-500 bg-amber-500/10'
                       : 'border-white/5 hover:border-white/10 bg-transparent'
                   }`}
                 >
@@ -154,7 +154,7 @@ export default function NewSessionPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-semibold transition-colors text-sm"
+              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-semibold transition-colors text-sm"
             >
               {loading ? 'Membuat...' : 'Buat Sesi'}
             </button>

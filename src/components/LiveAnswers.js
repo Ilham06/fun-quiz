@@ -120,7 +120,7 @@ export default function LiveAnswers({ sessionId, questionId = null, initialAnswe
                 key={a.id}
                 className={`rounded-2xl px-4 py-3 transition-all duration-700 ${
                   newIds.has(a.id)
-                    ? 'bg-purple-500/30 border border-purple-400/30 animate-slide-in-right'
+                    ? 'bg-amber-500/30 border border-amber-400/30 animate-slide-in-right'
                     : isTop
                       ? 'bg-gradient-to-r from-rose-500/15 to-pink-500/10 border border-rose-400/20'
                       : 'bg-white/[0.04] border border-white/[0.04]'

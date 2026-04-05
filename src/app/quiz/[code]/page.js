@@ -38,7 +38,7 @@ export default async function QuizPage({ params }) {
               <h1 className="font-bold text-white text-sm truncate">{session.title}</h1>
               <div className="flex items-center gap-2">
                 <span className="text-white/30 text-xs">{session.code}</span>
-                <span className="text-[10px] font-bold text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full">UJIAN</span>
+                <span className="text-[10px] font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded-full">UJIAN</span>
               </div>
             </div>
           </div>
