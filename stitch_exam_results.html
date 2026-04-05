@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FunQuiz - Hasil Ujian</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="typography">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+<style data-purpose="background-patterns">
+    .bg-pattern {
+      background-color: #ffffff;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(251, 191, 36, 0.05) 0%, transparent 10%),
+        radial-gradient(circle at 90% 80%, rgba(251, 191, 36, 0.05) 0%, transparent 15%);
+      position: relative;
+      overflow-x: hidden;
+    }
+    /* Animated/Static Decorative Elements */
+    .shape {
+      position: absolute;
+      z-index: 0;
+      opacity: 0.1;
+    }
+    .shape-circle { border-radius: 50%; border: 2px solid #FBBF24; width: 40px; height: 40px; }
+    .shape-triangle { 
+      width: 0; height: 0; 
+      border-left: 20px solid transparent; 
+      border-right: 20px solid transparent; 
+      border-bottom: 35px solid #FBBF24; 
+    }
+    .shape-square { border: 2px solid #FBBF24; width: 30px; height: 30px; transform: rotate(15deg); }
+  </style>
+<style data-purpose="score-gauge">
+    .gauge-container {
+      position: relative;
+      width: 200px;
+      height: 100px;
+      overflow: hidden;
+    }
+    .gauge-bg {
+      fill: none;
+      stroke: #f3f4f6;
+      stroke-width: 12;
+    }
+    .gauge-fill {
+      fill: none;
+      stroke: #FBBF24;
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-dasharray: 157; /* Half circumference of circle with r=50 */
+      stroke-dashoffset: 105; /* Approx 33% visible (157 * 0.67) */
+      transform: rotate(-180deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+<body class="bg-pattern min-h-screen text-slate-800">
+<!-- BEGIN: MainHeader -->
+<header class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-6 md:px-12 z-50">
+<div class="flex items-center gap-4">
+<div class="text-2xl font-extrabold tracking-tight flex items-center">
+<span class="text-amber-500">Fun</span><span>Quiz</span>
+</div>
+<div class="hidden md:block h-6 w-px bg-gray-200 mx-2"></div>
+<span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Sesi 1</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full bg-zinc-800 text-white flex items-center justify-center text-xs font-bold">N</div>
+<div class="bg-amber-50 text-amber-600 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-100">
+        UAAN • VBASTF
+      </div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- Decorative Shapes -->
+<div class="shape shape-circle top-32 left-[15%]" style="transform: scale(1.5)"></div>
+<div class="shape shape-triangle top-60 right-[10%]" style="transform: rotate(45deg)"></div>
+<div class="shape shape-square bottom-20 left-[10%]"></div>
+<div class="shape shape-circle bottom-40 right-[15%]"></div>
+<main class="pt-24 pb-12 px-4 flex flex-col items-center relative z-10">
+<!-- BEGIN: TrophySection -->
+<section class="mb-8 text-center" data-purpose="success-header">
+<div class="mb-4 flex justify-center">
+<div class="relative">
+<!-- Trophy SVG Placeholder mimicking the 3D style -->
+<svg fill="none" height="120" viewbox="0 0 100 100" width="120" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 10L62 35H38L50 10Z" fill="#FBBF24"></path>
+<circle cx="50" cy="50" fill="#FBBF24" r="30"></circle>
+<rect fill="#F59E0B" height="10" rx="2" width="16" x="42" y="75"></rect>
+<rect fill="#D97706" height="5" rx="2" width="30" x="35" y="85"></rect>
+<path d="M50 25L53 34H47L50 25Z" fill="white" opacity="0.5"></path>
+<!-- Star Rays -->
+<line stroke="#FBBF24" stroke-linecap="round" stroke-width="4" x1="50" x2="50" y1="5" y2="15"></line>
+<line stroke="#FBBF24" stroke-linecap="round" stroke-width="4" x1="15" x2="25" y1="40" y2="45"></line>
+<line stroke="#FBBF24" stroke-linecap="round" stroke-width="4" x1="85" x2="75" y1="40" y2="45"></line>
+</svg>
+</div>
+</div>
+<h1 class="text-3xl font-extrabold text-slate-900 mb-2">Ujian Selesai!</h1>
+<p class="text-gray-500 text-sm max-w-md mx-auto">
+        Kamu telah menjawab 13 dari 13 soal.<br/>
+        Terima kasih, RAFI.
+      </p>
+</section>
+<!-- END: TrophySection -->
+<!-- BEGIN: ResultsCard -->
+<article class="w-full max-w-2xl bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-8 md:p-10 border border-gray-50" data-purpose="exam-results-container">
+<!-- Score Gauge Area -->
+<div class="flex flex-col items-center mb-12">
+<div class="gauge-container mb-2">
+<svg height="100" viewbox="0 0 120 60" width="200">
+<path class="gauge-bg" d="M10 50 A 50 50 0 0 1 110 50"></path>
+<path class="gauge-fill" d="M10 50 A 50 50 0 0 1 110 50"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-end pb-1">
+<span class="text-4xl font-extrabold text-slate-800">3<span class="text-2xl text-gray-300 mx-1">/</span>9</span>
+<span class="text-sm font-bold text-amber-500 mt-1">33%</span>
+</div>
+</div>
+<p class="text-lg font-bold text-slate-800 mt-4">Tetap Semangat &amp; Terus Belajar</p>
+</div>
+<!-- Detail Jawaban List -->
+<div class="space-y-4 mb-10">
+<h2 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Detail Jawaban</h2>
+<!-- Correct Answer Card -->
+<div class="bg-green-50/50 border border-green-100 rounded-xl p-4 flex gap-4 items-start shadow-sm" data-purpose="answer-card-correct">
+<div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center shrink-0 text-sm font-bold">1</div>
+<div class="flex-grow">
+<p class="text-sm font-bold text-slate-800 mb-1">Apa ibu kota Indonesia?</p>
+<p class="text-[11px] text-red-500 font-medium">Jawaban: Bandung X</p>
+<p class="text-[11px] text-green-600 font-medium">Jawaban benar: Jakarta</p>
+</div>
+<div class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</div>
+<!-- Descriptive Answer Card -->
+<div class="bg-gray-50 border border-gray-100 rounded-xl p-4 flex gap-4 items-start" data-purpose="answer-card-neutral">
+<div class="w-8 h-8 rounded-lg bg-gray-200 text-gray-500 flex items-center justify-center shrink-0 text-sm font-bold">2</div>
+<div class="flex-grow">
+<p class="text-sm font-bold text-slate-800 mb-1">Jelaskan proses fotosintesis</p>
+<p class="text-[11px] text-gray-500">Jawaban: hhh</p>
+</div>
+</div>
+<!-- Incorrect Answer Card 1 -->
+<div class="bg-red-50/50 border border-red-100 rounded-xl p-4 flex gap-4 items-start shadow-sm" data-purpose="answer-card-incorrect">
+<div class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 text-sm font-bold">3</div>
+<div class="flex-grow">
+<p class="text-sm font-bold text-slate-800 mb-1">2 + 2 = ?</p>
+<p class="text-[11px] text-red-500 font-medium">Jawaban: 5 X</p>
+<p class="text-[11px] text-green-600 font-medium">Jawaban benar: 4</p>
+</div>
+<div class="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</div>
+<!-- Incorrect Answer Card 2 -->
+<div class="bg-red-50/50 border border-red-100 rounded-xl p-4 flex gap-4 items-start shadow-sm" data-purpose="answer-card-incorrect">
+<div class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 text-sm font-bold">4</div>
+<div class="flex-grow">
+<p class="text-sm font-bold text-slate-800 mb-1">Apa ibu kota Indonesia?</p>
+<p class="text-[11px] text-red-400 font-medium opacity-60">Jawaban: Medan X</p>
+</div>
+<div class="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-amber-400 hover:bg-amber-500 text-slate-800 font-bold py-4 rounded-2xl transition-all duration-200 transform active:scale-[0.98] shadow-lg shadow-amber-200" data-purpose="dashboard-button">
+        Kembali ke Dashboard
+      </button>
+</article>
+<!-- END: ResultsCard -->
+</main>
+</body></html>

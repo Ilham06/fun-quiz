@@ -20,13 +20,13 @@ export default function EmojiReactionBar({ sessionId }) {
   }
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="bg-white/80 backdrop-blur-xl px-6 py-3 rounded-full shadow-xl border border-gray-100 inline-flex items-center gap-5">
       {EMOJIS.map((emoji) => (
         <button
           key={emoji}
           onClick={() => sendReaction(emoji)}
           disabled={cooldown}
-          className="w-11 h-11 rounded-xl bg-white/5 hover:bg-white/15 active:scale-90 disabled:opacity-40 transition-all text-lg border border-white/5"
+          className="hover:scale-125 active:scale-90 disabled:opacity-40 transition-transform duration-200 text-2xl"
         >
           {emoji}
         </button>

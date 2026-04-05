@@ -32,10 +32,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#141005] flex items-center justify-center relative">
+    <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center relative text-gray-900">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-amber-500/15 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-yellow-600/10 blur-3xl" />
+        <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-amber-500/[0.12] blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-amber-400/[0.08] blur-3xl" />
       </div>
 
       <div className="relative z-10 w-full max-w-sm mx-4">
@@ -44,15 +44,15 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg shadow-amber-500/25">
               Q
             </div>
-            <span className="text-white/60 font-bold text-sm group-hover:text-white/80 transition-colors">funquiz</span>
+            <span className="text-gray-600 font-bold text-sm group-hover:text-gray-900 transition-colors">funquiz</span>
           </Link>
-          <h1 className="text-2xl font-bold text-white">Login Pengajar</h1>
-          <p className="text-white/40 text-sm mt-1">Kelola sesi quiz dan feedback</p>
+          <h1 className="text-2xl font-bold text-gray-900">Login Pengajar</h1>
+          <p className="text-gray-500 text-sm mt-1">Kelola sesi quiz dan feedback</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 space-y-4">
           <div>
-            <label htmlFor="username" className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+            <label htmlFor="username" className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
               Username
             </label>
             <input
@@ -61,13 +61,13 @@ export default function LoginPage() {
               type="text"
               required
               autoComplete="username"
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none text-gray-900 placeholder:text-gray-400 transition-colors"
               placeholder="admin"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+            <label htmlFor="password" className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
               Password
             </label>
             <input
@@ -76,13 +76,13 @@ export default function LoginPage() {
               type="password"
               required
               autoComplete="current-password"
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/25 transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none text-gray-900 placeholder:text-gray-400 transition-colors"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm animate-fade-up">{error}</p>
+            <p className="text-red-500 text-sm animate-fade-up">{error}</p>
           )}
 
           <button
@@ -94,8 +94,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-white/25 text-xs mt-6">
-          <Link href="/" className="hover:text-white/50 transition-colors">
+        <p className="text-center text-gray-400 text-xs mt-6">
+          <Link href="/" className="hover:text-gray-600 transition-colors">
             Kembali ke halaman utama
           </Link>
         </p>

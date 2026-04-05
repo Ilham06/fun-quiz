@@ -22,11 +22,11 @@ function AnswerTimer({ timerSeconds, questionId, onExpired }) {
 
   return (
     <>
-      <div className="flex items-center justify-center gap-2">
-        <div className={`font-mono text-2xl font-black ${timeLeft <= 10 ? 'text-red-400 animate-countdown-pulse' : 'text-white'}`}>
+      <div className="flex items-center justify-center gap-3">
+        <div className={`font-mono text-2xl font-black ${timeLeft <= 10 ? 'text-red-500 animate-countdown-pulse' : 'text-gray-900'}`}>
           {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
         </div>
-        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full transition-all duration-1000 ease-linear"
             style={{ width: `${(timeLeft / timerSeconds) * 100}%` }}
@@ -34,7 +34,7 @@ function AnswerTimer({ timerSeconds, questionId, onExpired }) {
         </div>
       </div>
       {expired && (
-        <p className="text-center text-red-400 text-sm font-medium animate-fade-up">Waktu habis!</p>
+        <p className="text-center text-red-500 text-sm font-medium animate-fade-up">Waktu habis!</p>
       )}
     </>
   )
@@ -88,24 +88,32 @@ export default function AnswerForm({ session, activeQuestion }) {
     setLoading(false)
   }
 
+  /* ── Stitch: "Discussion Submission Success" state ── */
   if (submitted) {
     return (
-      <div className="text-center py-8 animate-pop-in">
-        <div className="text-4xl mb-3">✓</div>
-        <h2 className="text-lg font-bold text-white mb-1">Terkirim!</h2>
-        <p className="text-white/40 text-sm">Terima kasih, {isAnon ? 'Anonim' : name || 'teman'}.</p>
-        {/* <button
-          onClick={() => { setSubmitted(false); setContent(''); setSelectedOption(null); setTimerExpired(false) }}
-          className="mt-5 text-xs text-amber-400 hover:text-amber-300 font-medium"
-        >
-          Kirim lagi
-        </button> */}
+      <div className="animate-fade-up">
+        <div className="bg-gradient-to-br from-amber-500 to-amber-700 rounded-3xl p-10 flex flex-col items-center justify-center text-center shadow-[0px_20px_50px_rgba(245,158,11,0.2)]">
+          {/* 3D-style success icon */}
+          <div className="mb-6 relative">
+            <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full" />
+            <div className="relative bg-white text-amber-600 rounded-full w-20 h-20 flex items-center justify-center shadow-xl">
+              <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-white text-3xl font-extrabold tracking-tight mb-2">Terkirim!</h2>
+          <p className="text-white/90 text-base font-medium">
+            Terima kasih, {isAnon ? 'Anonim' : name || 'teman'}.
+          </p>
+        </div>
       </div>
     )
   }
 
+  /* ── Stitch: "Premium Discussion Input" form ── */
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {timerSeconds > 0 && (
         <AnswerTimer
           key={activeQuestion?.id}
@@ -115,72 +123,102 @@ export default function AnswerForm({ session, activeQuestion }) {
         />
       )}
 
-      {/* Name */}
-      <div className="flex items-center gap-2">
-        {!isAnon && (
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={50}
-            className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm placeholder:text-white/20"
-            placeholder="Nama kamu"
-          />
-        )}
-        <button
-          type="button"
-          onClick={() => setIsAnon((v) => !v)}
-          className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-            isAnon
-              ? 'bg-white/20 text-white'
-              : 'bg-white/5 text-white/40 hover:text-white/60 border border-white/10'
-          }`}
-        >
-          {isAnon ? '👤 Anonim' : 'Anonim?'}
-        </button>
+      {/* Stitch: Name input with icon + anonymous toggle */}
+      <div className="group">
+        <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider ml-1">
+          Identitas
+        </label>
+        <div className="flex items-center bg-gray-50 rounded-2xl border-2 border-transparent group-focus-within:border-amber-400 group-focus-within:bg-white transition-all duration-300 overflow-hidden">
+          <div className="pl-4 pr-2 text-amber-500">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+          </div>
+          {!isAnon ? (
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={50}
+              className="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 font-medium py-4 placeholder:text-gray-400"
+              placeholder="Masukkan nama kamu..."
+            />
+          ) : (
+            <span className="flex-1 py-4 text-gray-400 font-medium italic">Anonim</span>
+          )}
+          <div className="pr-4 flex items-center gap-2 border-l border-gray-200/50 pl-4 py-2">
+            <button
+              type="button"
+              onClick={() => setIsAnon((v) => !v)}
+              className={`px-3 py-1.5 rounded-full text-[0.7rem] font-bold uppercase transition-all ${
+                isAnon
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+              }`}
+            >
+              {isAnon ? '👤 Anonim' : 'Anonim?'}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Answer */}
+      {/* Stitch: Answer input */}
       {activeQuestion?.type === 'multiple_choice' && activeQuestion.options?.length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
+          <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider ml-1">
+            Pilih Jawaban
+          </label>
           {activeQuestion.options.map((opt, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setSelectedOption(opt)}
               disabled={timerExpired}
-              className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all disabled:opacity-40 ${
+              className={`w-full text-left px-5 py-4 rounded-2xl border-2 transition-all disabled:opacity-40 ${
                 selectedOption === opt
-                  ? 'border-amber-400 bg-amber-500/20 text-white'
-                  : 'border-white/10 hover:border-white/20 text-white/80'
+                  ? 'border-amber-500 bg-amber-50 text-gray-900 shadow-sm'
+                  : 'border-transparent bg-gray-50 hover:border-amber-300 hover:bg-amber-50/50 text-gray-800'
               }`}
             >
-              <span className="font-bold text-white/40 mr-2">{String.fromCharCode(65 + i)}</span>
-              {opt}
+              <span className="font-bold text-gray-400 mr-3 text-lg">{String.fromCharCode(65 + i)}.</span>
+              <span className="text-base">{opt}</span>
             </button>
           ))}
         </div>
       ) : (
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={3}
-          required
-          disabled={timerExpired}
-          maxLength={500}
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white resize-none placeholder:text-white/20 disabled:opacity-40"
-          placeholder={activeQuestion ? 'Tulis jawabanmu...' : 'Tulis pesan atau jawabanmu...'}
-        />
+        <div className="group">
+          <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider ml-1">
+            Jawaban Kamu
+          </label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+            required
+            disabled={timerExpired}
+            maxLength={500}
+            className="w-full bg-gray-50 rounded-2xl border-2 border-transparent focus:border-amber-400 focus:bg-white focus:ring-0 transition-all duration-300 text-gray-900 font-medium p-5 resize-none placeholder:text-gray-400 disabled:opacity-40"
+            placeholder={activeQuestion ? 'Ketik jawaban kamu di sini...' : 'Tulis pesan atau jawabanmu...'}
+          />
+        </div>
       )}
 
-      {error && <p className="text-red-400 text-sm animate-fade-up">{error}</p>}
+      {error && <p className="text-red-500 text-sm animate-fade-up">{error}</p>}
 
+      {/* Stitch: Gradient submit button */}
       <button
         type="submit"
         disabled={loading || timerExpired}
-        className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-30 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98]"
+        className="w-full bg-gradient-to-br from-amber-500 to-amber-700 text-white font-bold py-5 rounded-2xl shadow-lg shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 flex items-center justify-center gap-3"
       >
-        {loading ? 'Mengirim...' : 'Kirim'}
+        <span className="tracking-widest uppercase text-sm">
+          {loading ? 'Mengirim...' : 'Kirim Jawaban'}
+        </span>
+        {!loading && (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+        )}
       </button>
     </form>
   )

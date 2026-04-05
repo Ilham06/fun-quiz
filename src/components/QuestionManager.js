@@ -241,7 +241,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-white text-sm">Pertanyaan</h3>
+        <h3 className="font-semibold text-gray-900 text-sm">Pertanyaan</h3>
         <div className="flex items-center gap-2">
           <input
             ref={fileInputRef}
@@ -252,7 +252,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
           />
           <button
             onClick={downloadTemplate}
-            className="text-[10px] text-white/20 hover:text-white/50 transition-colors"
+            className="text-[10px] text-gray-300 hover:text-gray-500 transition-colors"
             title="Download template Excel"
           >
             📄 Template
@@ -260,13 +260,13 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={importing}
-            className="text-xs text-white/30 hover:text-amber-400 font-semibold transition-colors disabled:opacity-50"
+            className="text-xs text-gray-400 hover:text-amber-600 font-semibold transition-colors disabled:opacity-50"
           >
             📥 Import
           </button>
           <button
             onClick={() => { setShowForm((v) => !v); setEditingId(null) }}
-            className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+            className="text-xs text-amber-600 hover:text-amber-500 font-semibold transition-colors"
           >
             {showForm ? '✕ Batal' : '+ Tambah'}
           </button>
@@ -276,8 +276,8 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
       {importStatus && (
         <div className={`rounded-xl px-3.5 py-2.5 mb-3 text-xs font-medium ${
           importStatus.error
-            ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-            : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+            ? 'bg-red-50 border border-red-200 text-red-500'
+            : 'bg-emerald-50 border border-emerald-200 text-emerald-600'
         }`}>
           {importStatus.text}
         </div>
@@ -288,16 +288,16 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
         <div className="flex items-center gap-2 mb-3">
           <button
             onClick={() => navigateQuestion('prev')}
-            className="px-2.5 py-1 rounded-lg bg-white/5 text-white/40 hover:text-white/80 hover:bg-white/10 text-xs transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-500 hover:text-gray-800 hover:bg-gray-200 text-xs transition-colors"
           >
             ← Prev
           </button>
-          <span className="text-white/20 text-xs flex-1 text-center">
+          <span className="text-gray-300 text-xs flex-1 text-center">
             {activeId ? `${questions.findIndex((q) => q.id === activeId) + 1} / ${questions.length}` : '—'}
           </span>
           <button
             onClick={() => navigateQuestion('next')}
-            className="px-2.5 py-1 rounded-lg bg-white/5 text-white/40 hover:text-white/80 hover:bg-white/10 text-xs transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-500 hover:text-gray-800 hover:bg-gray-200 text-xs transition-colors"
           >
             Next →
           </button>
@@ -305,43 +305,43 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
       )}
 
       {isExam && questions.length > 0 && (
-        <p className="text-white/30 text-xs mb-3">
+        <p className="text-gray-400 text-xs mb-3">
           Mahasiswa akan mengerjakan {questions.length} soal secara berurutan.
         </p>
       )}
 
       {showForm && (
-        <form onSubmit={addQuestion} className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4 mb-4 space-y-3">
+        <form onSubmit={addQuestion} className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 space-y-3">
           <textarea
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
             rows={2}
             required
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm resize-none placeholder:text-white/20"
+            className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm resize-none placeholder:text-gray-400"
             placeholder="Tulis pertanyaan..."
           />
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[10px] font-semibold text-white/30 mb-1 uppercase">Jenis</label>
+              <label className="block text-[10px] font-semibold text-gray-400 mb-1 uppercase">Jenis</label>
               <select
                 value={newType}
                 onChange={(e) => setNewType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm"
               >
                 <option value="open">Jawaban Bebas</option>
                 <option value="multiple_choice">Pilihan Ganda</option>
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-semibold text-white/30 mb-1 uppercase">Timer (detik)</label>
+              <label className="block text-[10px] font-semibold text-gray-400 mb-1 uppercase">Timer (detik)</label>
               <input
                 type="number"
                 min={0}
                 max={300}
                 value={newTimer}
                 onChange={(e) => setNewTimer(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm"
                 placeholder="0 = tanpa timer"
               />
             </div>
@@ -349,7 +349,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
 
           {newType === 'multiple_choice' && (
             <div className="space-y-2">
-              <label className="block text-[10px] font-semibold text-white/30 uppercase">Pilihan</label>
+              <label className="block text-[10px] font-semibold text-gray-400 uppercase">Pilihan</label>
               {newOptions.map((opt, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input
@@ -359,7 +359,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                       opts[i] = e.target.value
                       setNewOptions(opts)
                     }}
-                    className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm placeholder:text-white/20"
+                    className="flex-1 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm placeholder:text-gray-400"
                     placeholder={`Pilihan ${String.fromCharCode(65 + i)}`}
                   />
                   {isExam && opt.trim() && (
@@ -368,8 +368,8 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                       onClick={() => setNewCorrectAnswer(newCorrectAnswer === opt ? null : opt)}
                       className={`shrink-0 text-[10px] px-2 py-1.5 rounded-lg font-bold transition-colors ${
                         newCorrectAnswer === opt
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-white/5 text-white/25 hover:text-white/50 border border-white/5'
+                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-300'
+                          : 'bg-gray-100 text-gray-400 hover:text-gray-500 border border-gray-200'
                       }`}
                       title="Tandai sebagai jawaban benar"
                     >
@@ -378,17 +378,17 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                   )}
                 </div>
               ))}
-              <button type="button" onClick={() => setNewOptions([...newOptions, ''])} className="text-xs text-amber-400 hover:underline">
+              <button type="button" onClick={() => setNewOptions([...newOptions, ''])} className="text-xs text-amber-600 hover:underline">
                 + Tambah pilihan
               </button>
               {isExam && newOptions.some(o => o.trim()) && !newCorrectAnswer && (
-                <p className="text-amber-400/60 text-[10px]">Klik ✓ di samping pilihan untuk menandai jawaban benar</p>
+                <p className="text-amber-600 text-[10px]">Klik ✓ di samping pilihan untuk menandai jawaban benar</p>
               )}
             </div>
           )}
 
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs text-white/40 hover:text-white/60 transition-colors">
+            <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs text-gray-500 hover:text-gray-600 transition-colors">
               Batal
             </button>
             <button
@@ -403,50 +403,50 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
       )}
 
       {questions.length === 0 ? (
-        <p className="text-white/20 text-sm py-6 text-center">Belum ada pertanyaan.</p>
+        <p className="text-gray-300 text-sm py-6 text-center">Belum ada pertanyaan.</p>
       ) : (
         <div className="space-y-1.5">
           {questions.map((q, i) => (
             editingId === q.id ? (
-              <form key={q.id} onSubmit={saveEdit} className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-3">
+              <form key={q.id} onSubmit={saveEdit} className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Edit Soal {i + 1}</span>
-                  <button type="button" onClick={cancelEdit} className="text-xs text-white/30 hover:text-white/60">✕</button>
+                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Edit Soal {i + 1}</span>
+                  <button type="button" onClick={cancelEdit} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
                 </div>
                 <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
                   rows={2}
                   required
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm resize-none placeholder:text-white/20"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm resize-none placeholder:text-gray-400"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-semibold text-white/30 mb-1 uppercase">Jenis</label>
+                    <label className="block text-[10px] font-semibold text-gray-400 mb-1 uppercase">Jenis</label>
                     <select
                       value={editType}
                       onChange={(e) => setEditType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm"
                     >
                       <option value="open">Jawaban Bebas</option>
                       <option value="multiple_choice">Pilihan Ganda</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-white/30 mb-1 uppercase">Timer (detik)</label>
+                    <label className="block text-[10px] font-semibold text-gray-400 mb-1 uppercase">Timer (detik)</label>
                     <input
                       type="number"
                       min={0}
                       max={300}
                       value={editTimer}
                       onChange={(e) => setEditTimer(parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm"
                     />
                   </div>
                 </div>
                 {editType === 'multiple_choice' && (
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-semibold text-white/30 uppercase">Pilihan</label>
+                    <label className="block text-[10px] font-semibold text-gray-400 uppercase">Pilihan</label>
                     {editOptions.map((opt, oi) => (
                       <div key={oi} className="flex items-center gap-2">
                         <input
@@ -456,7 +456,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                             opts[oi] = e.target.value
                             setEditOptions(opts)
                           }}
-                          className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white text-sm placeholder:text-white/20"
+                          className="flex-1 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 text-sm placeholder:text-gray-400"
                           placeholder={`Pilihan ${String.fromCharCode(65 + oi)}`}
                         />
                         {isExam && opt.trim() && (
@@ -465,8 +465,8 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                             onClick={() => setEditCorrectAnswer(editCorrectAnswer === opt ? null : opt)}
                             className={`shrink-0 text-[10px] px-2 py-1.5 rounded-lg font-bold transition-colors ${
                               editCorrectAnswer === opt
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : 'bg-white/5 text-white/25 hover:text-white/50 border border-white/5'
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-300'
+                                : 'bg-gray-100 text-gray-400 hover:text-gray-500 border border-gray-200'
                             }`}
                           >
                             {editCorrectAnswer === opt ? '✓ Benar' : '✓'}
@@ -480,20 +480,20 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                               setEditOptions(opts)
                               if (editCorrectAnswer === opt) setEditCorrectAnswer(null)
                             }}
-                            className="shrink-0 text-[10px] px-1.5 py-1.5 rounded-lg text-red-400/40 hover:text-red-400"
+                            className="shrink-0 text-[10px] px-1.5 py-1.5 rounded-lg text-red-400 hover:text-red-500"
                           >
                             ✕
                           </button>
                         )}
                       </div>
                     ))}
-                    <button type="button" onClick={() => setEditOptions([...editOptions, ''])} className="text-xs text-amber-400 hover:underline">
+                    <button type="button" onClick={() => setEditOptions([...editOptions, ''])} className="text-xs text-amber-600 hover:underline">
                       + Tambah pilihan
                     </button>
                   </div>
                 )}
                 <div className="flex justify-end gap-2">
-                  <button type="button" onClick={cancelEdit} className="px-3 py-1.5 rounded-lg text-xs text-white/40 hover:text-white/60 transition-colors">
+                  <button type="button" onClick={cancelEdit} className="px-3 py-1.5 rounded-lg text-xs text-gray-500 hover:text-gray-600 transition-colors">
                     Batal
                   </button>
                   <button
@@ -510,22 +510,22 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                 key={q.id}
                 className={`rounded-xl border p-3 flex items-start gap-3 transition-all ${
                   !isExam && q.is_active
-                    ? 'border-amber-500/30 bg-amber-500/10'
-                    : 'border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]'
+                    ? 'border-amber-300 bg-amber-50'
+                    : 'border-gray-200 bg-white hover:bg-gray-50'
                 }`}
               >
-                <span className="text-xs font-bold text-white/20 mt-0.5 w-5 shrink-0 text-right">{i + 1}</span>
+                <span className="text-xs font-bold text-gray-300 mt-0.5 w-5 shrink-0 text-right">{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white/90 leading-snug">{q.text}</p>
+                  <p className="text-sm text-gray-800 leading-snug">{q.text}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className="text-[10px] text-white/25">
+                    <span className="text-[10px] text-gray-400">
                       {q.type === 'open' ? 'Bebas' : 'Pilihan ganda'}
                     </span>
                     {q.timer_seconds > 0 && (
-                      <span className="text-[10px] text-amber-400/60">⏱ {q.timer_seconds}s</span>
+                      <span className="text-[10px] text-amber-600">⏱ {q.timer_seconds}s</span>
                     )}
                     {isExam && q.correct_answer && (
-                      <span className="text-[10px] text-emerald-400/60">✓ {q.correct_answer}</span>
+                      <span className="text-[10px] text-emerald-500">✓ {q.correct_answer}</span>
                     )}
                     {!isExam && q.is_active && (
                       <span className="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full font-bold">AKTIF</span>
@@ -535,7 +535,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                 <div className="flex gap-1 shrink-0">
                   <button
                     onClick={() => startEdit(q)}
-                    className="text-[10px] px-1.5 py-1 rounded-lg text-white/25 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                    className="text-[10px] px-1.5 py-1 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
                     title="Edit"
                   >
                     ✎
@@ -546,7 +546,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                       className={`text-[10px] px-2 py-1 rounded-lg font-bold transition-colors ${
                         q.is_active
                           ? 'bg-amber-500 text-white hover:bg-amber-400'
-                          : 'bg-white/5 text-white/30 hover:text-white/60 hover:bg-white/10'
+                          : 'bg-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-200'
                       }`}
                     >
                       {q.is_active ? 'ON' : 'OFF'}
@@ -554,7 +554,7 @@ export default function QuestionManager({ sessionId, initialQuestions = [], sess
                   )}
                   <button
                     onClick={() => deleteQuestion(q.id)}
-                    className="text-[10px] px-1.5 py-1 rounded-lg text-red-400/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="text-[10px] px-1.5 py-1 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                   >
                     ✕
                   </button>

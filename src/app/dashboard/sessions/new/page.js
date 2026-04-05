@@ -4,10 +4,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const SESSION_TYPES = [
-  { value: 'quiz', label: 'Quiz', icon: '🧠', desc: 'Pertanyaan & jawaban' },
-  { value: 'exam', label: 'Ujian', icon: '📝', desc: 'Soal berurutan, mahasiswa mengerjakan sendiri' },
-  { value: 'feedback', label: 'Feedback', icon: '💬', desc: 'Pesan, kesan, kritik, saran' },
-  { value: 'qa', label: 'Tanya Jawab', icon: '🙋', desc: 'Q&A interaktif' },
+  { value: 'quiz', label: 'Diskusi', icon: '💬', desc: 'Pertanyaan terbuka, feedback, Q&A interaktif' },
+  { value: 'exam', label: 'Quiz / Ujian', icon: '📝', desc: 'Soal berurutan, mahasiswa mengerjakan sendiri' },
 ]
 
 const THEMES = [
@@ -52,23 +50,23 @@ export default function NewSessionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#141005]">
-      <header className="border-b border-white/5">
+    <div className="min-h-screen bg-[#f8f9fa]">
+      <header className="border-b border-gray-200">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center gap-3">
-          <Link href="/dashboard" className="text-white/30 hover:text-white/60 transition-colors text-sm">
+          <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">
             ← Dashboard
           </Link>
-          <span className="text-white/10">|</span>
-          <h1 className="text-white font-semibold text-sm">Buat Sesi Baru</h1>
+          <span className="text-gray-200">|</span>
+          <h1 className="text-gray-900 font-semibold text-sm">Buat Sesi Baru</h1>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title & Description */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-sm">
             <div>
-              <label htmlFor="title" className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+              <label htmlFor="title" className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
                 Judul Sesi
               </label>
               <input
@@ -77,30 +75,30 @@ export default function NewSessionPage() {
                 type="text"
                 required
                 maxLength={100}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/20 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 placeholder:text-gray-400 transition-colors"
                 placeholder="Quiz Bab 3, Pesan & Kesan, dll."
               />
             </div>
             <div>
-              <label htmlFor="description" className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+              <label htmlFor="description" className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
                 Deskripsi
-                <span className="text-white/20 font-normal normal-case ml-1">opsional</span>
+                <span className="text-gray-300 font-normal normal-case ml-1">opsional</span>
               </label>
               <textarea
                 id="description"
                 name="description"
                 rows={2}
                 maxLength={300}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-amber-400 focus:outline-none text-white placeholder:text-white/20 transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-amber-500 focus:outline-none text-gray-900 placeholder:text-gray-400 transition-colors resize-none"
                 placeholder="Deskripsi singkat..."
               />
             </div>
           </div>
 
           {/* Session Type */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
-            <p className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Jenis Sesi</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Jenis Sesi</p>
+            <div className="grid grid-cols-2 gap-3">
               {SESSION_TYPES.map((t) => (
                 <button
                   key={t.value}
@@ -108,21 +106,21 @@ export default function NewSessionPage() {
                   onClick={() => setType(t.value)}
                   className={`p-3 rounded-xl border-2 text-left transition-all ${
                     type === t.value
-                      ? 'border-amber-500 bg-amber-500/10'
-                      : 'border-white/5 hover:border-white/10 bg-transparent'
+                      ? 'border-amber-500 bg-amber-50'
+                      : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'
                   }`}
                 >
                   <div className="text-xl mb-1">{t.icon}</div>
-                  <div className="text-white text-sm font-semibold">{t.label}</div>
-                  <div className="text-white/30 text-xs mt-0.5">{t.desc}</div>
+                  <div className="text-gray-900 text-sm font-semibold">{t.label}</div>
+                  <div className="text-gray-400 text-xs mt-0.5">{t.desc}</div>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Theme */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
-            <p className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Tema Visual</p>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Tema Visual</p>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {THEMES.map((t) => (
                 <button
@@ -130,31 +128,31 @@ export default function NewSessionPage() {
                   type="button"
                   onClick={() => setTheme(t.value)}
                   className={`rounded-xl overflow-hidden border-2 transition-all ${
-                    theme === t.value ? 'border-white ring-1 ring-white/20' : 'border-transparent opacity-60 hover:opacity-80'
+                    theme === t.value ? 'border-gray-300 ring-1 ring-gray-200' : 'border-gray-200 opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className={`h-10 bg-gradient-to-br ${t.gradient}`} />
-                  <div className="py-1.5 text-center text-[10px] text-white/60 font-medium">{t.label}</div>
+                  <div className="py-1.5 text-center text-[10px] text-gray-500 font-medium bg-white">{t.label}</div>
                 </button>
               ))}
             </div>
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm animate-fade-up">{error}</p>
+            <p className="text-red-600 text-sm animate-fade-up">{error}</p>
           )}
 
           <div className="flex gap-3 justify-end">
             <Link
               href="/dashboard"
-              className="px-5 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 transition-colors text-sm font-medium"
+              className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium bg-white shadow-sm"
             >
               Batal
             </Link>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-semibold transition-colors text-sm"
+              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-semibold transition-colors text-sm shadow-sm"
             >
               {loading ? 'Membuat...' : 'Buat Sesi'}
             </button>

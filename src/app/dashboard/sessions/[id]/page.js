@@ -7,6 +7,7 @@ import QuestionManager from '@/components/QuestionManager'
 import LogoutButton from '@/components/LogoutButton'
 import ViolationsPanel from '@/components/ViolationsPanel'
 import ExamAnswersByStudent from '@/components/ExamAnswersByStudent'
+import ShuffleSettings from '@/components/ShuffleSettings'
 
 const TYPE_META = {
   quiz: { label: 'Quiz', icon: '🧠' },
@@ -60,89 +61,104 @@ export default async function SessionDetailPage({ params }) {
   const meta = TYPE_META[session.type] || TYPE_META.quiz
 
   return (
-    <div className="min-h-screen bg-[#141005]">
-      <header className="border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-white/30 hover:text-white/60 transition-colors text-sm">
-              ← Dashboard
-            </Link>
-            <span className="text-white/10">|</span>
-            <span className="text-white font-semibold text-sm truncate max-w-[200px]">{session.title}</span>
-          </div>
-          <LogoutButton />
+    <div className="min-h-screen bg-[#f8f9fa]">
+      {/* Stitch: Top Navigation */}
+      <nav className="w-full bg-white border-b border-gray-100 py-4 px-8 flex justify-between items-center">
+        <div className="flex items-center space-x-4 text-sm font-medium">
+          <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1.5">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+            Dashboard
+          </Link>
+          <span className="text-gray-300">|</span>
+          <span className="text-gray-900 font-bold uppercase tracking-wider truncate max-w-[300px]">{session.title}</span>
         </div>
-      </header>
+        <LogoutButton />
+      </nav>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-        {/* Session info bar */}
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2.5 mb-1">
-                <span className="text-xl">{meta.icon}</span>
-                <h2 className="text-xl font-bold text-white">{session.title}</h2>
-                <span className="text-[10px] font-bold text-white/30 bg-white/5 px-2 py-0.5 rounded-full">
+      <main className="max-w-7xl mx-auto py-10 px-6 space-y-6">
+        {/* Stitch: Hero Section */}
+        <section className="bg-white rounded-2xl p-8 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-gray-50 rounded-xl">
+                <span className="text-2xl">{meta.icon}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">{session.title}</h1>
+                <span className="px-2.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full uppercase tracking-wider">
                   {meta.label}
                 </span>
-              </div>
-              {session.description && (
-                <p className="text-white/40 text-sm ml-8">{session.description}</p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-3 ml-8">
-                <div className="bg-white/5 rounded-xl px-3 py-2 flex items-center gap-2">
-                  <span className="text-white/30 text-xs">Kode:</span>
-                  <span className="font-mono font-bold text-white text-lg tracking-widest">{session.code}</span>
-                </div>
-                <a
-                  href={`/display/${session.code}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
-                >
-                  Display diskusi
-                </a>
               </div>
             </div>
             <SessionControls sessionId={id} initialActive={session.is_active} />
           </div>
-        </div>
 
+          {session.description && (
+            <p className="text-gray-500 text-sm mb-5 ml-[52px]">{session.description}</p>
+          )}
+
+          <div className="flex items-center space-x-4 ml-[52px]">
+            <div className="flex items-center bg-amber-400 rounded-xl px-6 py-3 space-x-3">
+              <span className="text-sm font-semibold opacity-70">Kode:</span>
+              <span className="text-2xl font-black tracking-[0.2em]">{session.code}</span>
+            </div>
+            <a
+              href={`/display/${session.code}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3.5 bg-amber-400 hover:bg-amber-500 rounded-xl font-bold text-sm shadow-sm transition-all"
+            >
+              Display diskusi
+            </a>
+          </div>
+        </section>
+
+        {/* Shuffle settings — exam only */}
+        {session.type === 'exam' && (
+          <ShuffleSettings
+            sessionId={id}
+            initialShuffleQuestions={session.shuffle_questions ?? false}
+            initialShuffleOptions={session.shuffle_options ?? false}
+          />
+        )}
+
+        {/* Stitch: Alert Section — Tab Violations */}
         {session.type === 'exam' && violations.length > 0 && (
           <ViolationsPanel violations={violations} questions={questions || []} />
         )}
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Questions */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
+        {/* Stitch: Two Column Grid — 7/5 split */}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left: Questions (col-span-7) */}
+          <div className="col-span-12 lg:col-span-7 bg-white rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100">
             <QuestionManager sessionId={id} initialQuestions={questions || []} sessionType={session.type} />
           </div>
 
-          {/* Answers preview */}
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
+          {/* Right: Answers / Student Submissions (col-span-5) */}
+          <div className="col-span-12 lg:col-span-5 bg-white rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100">
             {session.type === 'exam' ? (
               <ExamAnswersByStudent answers={answers || []} questions={questions || []} sessionName={session.title} />
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-white text-sm">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-bold text-gray-900 text-sm">
                     Jawaban Masuk
-                    <span className="text-white/30 font-normal ml-1.5">({answers?.length || 0})</span>
+                    <span className="text-gray-400 font-medium ml-1.5">({answers?.length || 0})</span>
                   </h3>
                 </div>
                 {!answers || answers.length === 0 ? (
-                  <p className="text-white/25 text-sm py-8 text-center">Belum ada jawaban.</p>
+                  <p className="text-gray-400 text-sm py-8 text-center">Belum ada jawaban.</p>
                 ) : (
-                  <div className="space-y-2 max-h-[420px] overflow-y-auto scrollbar-thin">
+                  <div className="space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin">
                     {answers.map((a) => (
-                      <div key={a.id} className="bg-white/[0.04] rounded-xl px-3.5 py-2.5">
-                        <p className="text-white/90 text-sm">{a.content}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-white/30 text-xs">
+                      <div key={a.id} className="bg-white border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <p className="text-gray-800 text-sm">{a.content}</p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-gray-400 text-xs">
                             {a.student_name || 'Anonim'} · {new Date(a.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                           {a.upvotes > 0 && (
-                            <span className="text-xs text-yellow-400/80">▲ {a.upvotes}</span>
+                            <span className="text-xs font-bold text-amber-500">▲ {a.upvotes}</span>
                           )}
                         </div>
                       </div>

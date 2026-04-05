@@ -10,6 +10,8 @@ create table if not exists sessions (
   type text not null default 'quiz' check (type in ('quiz', 'exam', 'feedback', 'qa')),
   theme text not null default 'default',
   is_active boolean not null default false,
+  shuffle_questions boolean not null default false,
+  shuffle_options boolean not null default false,
   created_at timestamptz not null default now()
 );
 

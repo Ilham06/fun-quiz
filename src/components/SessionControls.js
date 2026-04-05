@@ -27,22 +27,23 @@ export default function SessionControls({ sessionId, initialActive }) {
   }
 
   return (
-    <div className="flex gap-2 items-center shrink-0">
+    <div className="flex space-x-3 items-center shrink-0">
       <button
         onClick={toggleActive}
         disabled={loading}
-        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 ${
+        className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-50 ${
           isActive
-            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25'
-            : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
         }`}
       >
-        {isActive ? '● LIVE' : '○ Nonaktif'}
+        {isActive && <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />}
+        <span>{isActive ? 'LIVE' : 'Nonaktif'}</span>
       </button>
       <button
         onClick={deleteSession}
         disabled={loading}
-        className="px-3 py-2 rounded-xl text-xs text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+        className="px-4 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs font-bold hover:bg-amber-100 transition-colors disabled:opacity-50"
       >
         Hapus
       </button>
