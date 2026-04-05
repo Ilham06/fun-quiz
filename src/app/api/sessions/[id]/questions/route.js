@@ -9,7 +9,7 @@ export async function POST(request, { params }) {
   }
 
   const { id: session_id } = await params
-  const { text, type, options, order, timer_seconds, show_answers } = await request.json()
+  const { text, type, options, correct_answer, order, timer_seconds, show_answers } = await request.json()
 
   if (!text?.trim()) {
     return NextResponse.json({ error: 'Teks pertanyaan wajib diisi.' }, { status: 400 })
@@ -24,6 +24,7 @@ export async function POST(request, { params }) {
       text: text.trim(),
       type: type || 'open',
       options: options || null,
+      correct_answer: correct_answer || null,
       timer_seconds: timer_seconds || 0,
       show_answers: show_answers !== false,
       order: order ?? 0,

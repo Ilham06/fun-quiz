@@ -6,6 +6,7 @@ import SessionControls from '@/components/SessionControls'
 import QuestionManager from '@/components/QuestionManager'
 import LogoutButton from '@/components/LogoutButton'
 import ViolationsPanel from '@/components/ViolationsPanel'
+import ExamAnswersByStudent from '@/components/ExamAnswersByStudent'
 
 const TYPE_META = {
   quiz: { label: 'Quiz', icon: '🧠' },
@@ -99,7 +100,7 @@ export default async function SessionDetailPage({ params }) {
                   rel="noopener noreferrer"
                   className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
                 >
-                  Buka Layar Proyektor
+                  Display diskusi
                 </a>
               </div>
             </div>
@@ -119,61 +120,36 @@ export default async function SessionDetailPage({ params }) {
 
           {/* Answers preview */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-white text-sm">
-                Jawaban Masuk
-                <span className="text-white/30 font-normal ml-1.5">({answers?.length || 0})</span>
-              </h3>
-            </div>
-            {!answers || answers.length === 0 ? (
-              <p className="text-white/25 text-sm py-8 text-center">Belum ada jawaban.</p>
-            ) : session.type === 'exam' ? (
-              <div className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin">
-                {(questions || []).map((q, qi) => {
-                  const qAnswers = answers.filter(a => a.question_id === q.id)
-                  return (
-                    <div key={q.id}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                          Soal {qi + 1}
-                        </span>
-                        <span className="text-white/30 text-xs truncate">{q.text}</span>
-                        <span className="text-white/20 text-xs ml-auto shrink-0">{qAnswers.length} jawaban</span>
-                      </div>
-                      {qAnswers.length === 0 ? (
-                        <p className="text-white/15 text-xs pl-2 mb-2">Belum ada jawaban.</p>
-                      ) : (
-                        <div className="space-y-1.5 mb-2">
-                          {qAnswers.map((a) => (
-                            <div key={a.id} className="bg-white/[0.04] rounded-xl px-3.5 py-2.5">
-                              <p className="text-white/90 text-sm">{a.content}</p>
-                              <p className="text-white/30 text-xs mt-1">
-                                {a.student_name || 'Anonim'} · {new Date(a.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+            {session.type === 'exam' ? (
+              <ExamAnswersByStudent answers={answers || []} questions={questions || []} sessionName={session.title} />
             ) : (
-              <div className="space-y-2 max-h-[420px] overflow-y-auto scrollbar-thin">
-                {answers.map((a) => (
-                  <div key={a.id} className="bg-white/[0.04] rounded-xl px-3.5 py-2.5">
-                    <p className="text-white/90 text-sm">{a.content}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-white/30 text-xs">
-                        {a.student_name || 'Anonim'} · {new Date(a.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      {a.upvotes > 0 && (
-                        <span className="text-xs text-yellow-400/80">▲ {a.upvotes}</span>
-                      )}
-                    </div>
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-white text-sm">
+                    Jawaban Masuk
+                    <span className="text-white/30 font-normal ml-1.5">({answers?.length || 0})</span>
+                  </h3>
+                </div>
+                {!answers || answers.length === 0 ? (
+                  <p className="text-white/25 text-sm py-8 text-center">Belum ada jawaban.</p>
+                ) : (
+                  <div className="space-y-2 max-h-[420px] overflow-y-auto scrollbar-thin">
+                    {answers.map((a) => (
+                      <div key={a.id} className="bg-white/[0.04] rounded-xl px-3.5 py-2.5">
+                        <p className="text-white/90 text-sm">{a.content}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-white/30 text-xs">
+                            {a.student_name || 'Anonim'} · {new Date(a.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          {a.upvotes > 0 && (
+                            <span className="text-xs text-yellow-400/80">▲ {a.upvotes}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>

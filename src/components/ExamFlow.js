@@ -140,6 +140,7 @@ export default function ExamFlow({ session, questions, theme }) {
   const [error, setError] = useState('')
   const [timerExpired, setTimerExpired] = useState(false)
   const [answeredIds, setAnsweredIds] = useState(new Set())
+  const [studentAnswers, setStudentAnswers] = useState({})
 
   const currentQuestion = questions[currentIndex] || null
   const isFinished = currentIndex >= questions.length
@@ -158,18 +159,20 @@ export default function ExamFlow({ session, questions, theme }) {
     const savedProgress = sessionStorage.getItem(`exam-${session.id}-progress`)
     if (savedProgress) {
       try {
-        const { index, answered } = JSON.parse(savedProgress)
+        const { index, answered, answers: savedAnswers } = JSON.parse(savedProgress)
         setCurrentIndex(index)
         setAnsweredIds(new Set(answered))
+        if (savedAnswers) setStudentAnswers(savedAnswers)
         setStarted(true)
       } catch {}
     }
   }, [session.id])
 
-  const saveProgress = useCallback((index, answered) => {
+  const saveProgress = useCallback((index, answered, answers) => {
     sessionStorage.setItem(`exam-${session.id}-progress`, JSON.stringify({
       index,
       answered: [...answered],
+      answers,
     }))
   }, [session.id])
 
@@ -212,12 +215,15 @@ export default function ExamFlow({ session, questions, theme }) {
       newAnswered.add(currentQuestion.id)
       setAnsweredIds(newAnswered)
 
+      const newStudentAnswers = { ...studentAnswers, [currentQuestion.id]: answerContent }
+      setStudentAnswers(newStudentAnswers)
+
       const nextIndex = currentIndex + 1
       setCurrentIndex(nextIndex)
       setContent('')
       setSelectedOption(null)
       setTimerExpired(false)
-      saveProgress(nextIndex, newAnswered)
+      saveProgress(nextIndex, newAnswered, newStudentAnswers)
     } else {
       const data = await res.json()
       setError(data.error || 'Gagal mengirim jawaban.')
@@ -233,6 +239,7 @@ export default function ExamFlow({ session, questions, theme }) {
           ? selectedOption
           : content
 
+      let newStudentAnswers = { ...studentAnswers }
       if (answerContent?.trim()) {
         await fetch('/api/answers', {
           method: 'POST',
@@ -247,6 +254,8 @@ export default function ExamFlow({ session, questions, theme }) {
         const newAnswered = new Set(answeredIds)
         newAnswered.add(currentQuestion.id)
         setAnsweredIds(newAnswered)
+        newStudentAnswers = { ...newStudentAnswers, [currentQuestion.id]: answerContent }
+        setStudentAnswers(newStudentAnswers)
       }
 
       const nextIndex = currentIndex + 1
@@ -254,7 +263,7 @@ export default function ExamFlow({ session, questions, theme }) {
       setContent('')
       setSelectedOption(null)
       setTimerExpired(false)
-      saveProgress(nextIndex, answeredIds)
+      saveProgress(nextIndex, answeredIds, newStudentAnswers)
     }, 1500)
   }
 
@@ -326,9 +335,14 @@ export default function ExamFlow({ session, questions, theme }) {
   }
 
   if (isFinished) {
+    const scorableQuestions = questions.filter(q => q.correct_answer)
+    const correctCount = scorableQuestions.filter(q => studentAnswers[q.id] === q.correct_answer).length
+    const hasScore = scorableQuestions.length > 0
+    const scorePercent = hasScore ? Math.round((correctCount / scorableQuestions.length) * 100) : 0
+
     return (
       <div className="space-y-4 animate-fade-up">
-        <div className="text-center py-16">
+        <div className="text-center py-10">
           <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <span className="text-4xl">✅</span>
           </div>
@@ -338,6 +352,72 @@ export default function ExamFlow({ session, questions, theme }) {
           </p>
           <p className="text-white/30 text-sm">Terima kasih, {name}.</p>
         </div>
+
+        {hasScore && (
+          <div className="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-6">
+            <div className="text-center mb-5">
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Skor Kamu</p>
+              <div className="flex items-baseline justify-center gap-1">
+                <span className={`text-5xl font-black ${scorePercent >= 70 ? 'text-emerald-400' : scorePercent >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+                  {correctCount}
+                </span>
+                <span className="text-white/30 text-xl font-bold">/ {scorableQuestions.length}</span>
+              </div>
+              <div className="mt-2 w-full max-w-[200px] mx-auto h-2 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ${scorePercent >= 70 ? 'bg-emerald-500' : scorePercent >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
+                  style={{ width: `${scorePercent}%` }}
+                />
+              </div>
+              <p className={`text-sm font-bold mt-2 ${scorePercent >= 70 ? 'text-emerald-400' : scorePercent >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+                {scorePercent}%
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Detail Jawaban</p>
+              {questions.map((q, i) => {
+                const myAnswer = studentAnswers[q.id]
+                const isCorrect = q.correct_answer && myAnswer === q.correct_answer
+                const hasCorrect = !!q.correct_answer
+                return (
+                  <div key={q.id} className={`rounded-xl px-3.5 py-2.5 border ${
+                    !hasCorrect
+                      ? 'bg-white/[0.03] border-white/[0.04]'
+                      : isCorrect
+                        ? 'bg-emerald-500/10 border-emerald-500/20'
+                        : 'bg-red-500/10 border-red-500/20'
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs font-bold text-white/20 mt-0.5 w-5 shrink-0 text-right">{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white/80 leading-snug">{q.text}</p>
+                        <div className="mt-1.5 space-y-0.5">
+                          {myAnswer ? (
+                            <p className={`text-xs ${hasCorrect ? (isCorrect ? 'text-emerald-400' : 'text-red-400') : 'text-white/50'}`}>
+                              Jawaban: {myAnswer} {hasCorrect && (isCorrect ? ' ✓' : ' ✗')}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-white/25">Tidak dijawab</p>
+                          )}
+                          {hasCorrect && !isCorrect && (
+                            <p className="text-xs text-emerald-400/70">Jawaban benar: {q.correct_answer}</p>
+                          )}
+                        </div>
+                      </div>
+                      {hasCorrect && (
+                        <span className={`shrink-0 text-lg ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {isCorrect ? '✓' : '✗'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {violationCount > 0 && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
             <p className="text-red-300/80 text-sm">

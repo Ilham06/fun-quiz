@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# cursor mcp config (contains API keys)
+.cursor/mcp.json
+
 # debug
 npm-debug.log*
 yarn-debug.log*

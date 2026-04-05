@@ -20,6 +20,7 @@ create table if not exists questions (
   text text not null,
   type text not null default 'open' check (type in ('open', 'multiple_choice')),
   options jsonb,
+  correct_answer text,
   timer_seconds integer default 0,
   "order" integer not null default 0,
   is_active boolean not null default false,

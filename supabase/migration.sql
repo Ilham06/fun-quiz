@@ -9,6 +9,7 @@ alter table sessions add constraint sessions_type_check check (type in ('quiz', 
 alter table sessions add column if not exists theme text not null default 'default';
 
 -- Add new columns to questions
+alter table questions add column if not exists correct_answer text;
 alter table questions add column if not exists timer_seconds integer default 0;
 alter table questions add column if not exists show_answers boolean not null default true;
 

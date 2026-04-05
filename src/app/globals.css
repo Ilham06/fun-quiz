@@ -132,6 +132,39 @@ input, textarea, select {
   animation: shimmer 2s infinite;
 }
 
+@keyframes float-shape {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+.animate-float-shape {
+  animation: float-shape 8s ease-in-out infinite;
+}
+.animate-float-shape-slow {
+  animation: float-shape 12s ease-in-out infinite;
+}
+.animate-float-shape-fast {
+  animation: float-shape 6s ease-in-out infinite;
+}
+
+.text-glow-yellow {
+  text-shadow: 0 4px 24px rgba(255, 221, 0, 0.3);
+}
+
+.code-box {
+  caret-color: #ffdd00;
+}
+.code-box:focus {
+  box-shadow: 0 0 20px rgba(255, 221, 0, 0.4);
+}
+
+.btn-glow {
+  box-shadow: 0 10px 30px rgba(255, 221, 0, 0.35);
+}
+.btn-glow:hover {
+  box-shadow: 0 15px 40px rgba(255, 221, 0, 0.55);
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }

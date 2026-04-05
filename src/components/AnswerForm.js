@@ -94,12 +94,12 @@ export default function AnswerForm({ session, activeQuestion }) {
         <div className="text-4xl mb-3">✓</div>
         <h2 className="text-lg font-bold text-white mb-1">Terkirim!</h2>
         <p className="text-white/40 text-sm">Terima kasih, {isAnon ? 'Anonim' : name || 'teman'}.</p>
-        <button
+        {/* <button
           onClick={() => { setSubmitted(false); setContent(''); setSelectedOption(null); setTimerExpired(false) }}
           className="mt-5 text-xs text-amber-400 hover:text-amber-300 font-medium"
         >
           Kirim lagi
-        </button>
+        </button> */}
       </div>
     )
   }
