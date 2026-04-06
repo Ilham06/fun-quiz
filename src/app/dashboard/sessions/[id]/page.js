@@ -1,4 +1,4 @@
-import { verifySession } from '@/lib/dal'
+import { verifySession, getPermissions } from '@/lib/dal'
 import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -17,12 +17,14 @@ const TYPE_META = {
 }
 
 export default async function SessionDetailPage({ params }) {
-  await verifySession()
+  const { userId } = await verifySession()
+  const perms = await getPermissions()
 
   const { id } = await params
 
   const session = await prisma.session.findUnique({ where: { id } })
   if (!session) notFound()
+  if (!perms.includes('view_all_sessions') && session.user_id !== userId) notFound()
 
   const questions = await prisma.question.findMany({
     where: { session_id: id },

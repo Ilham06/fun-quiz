@@ -1,4 +1,4 @@
-import { verifySession } from '@/lib/dal'
+import { verifySession, getPermissions } from '@/lib/dal'
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
@@ -19,11 +19,17 @@ const TYPE_ICONS = {
 
 export default async function DashboardPage() {
   const { userId } = await verifySession()
+  const perms = await getPermissions()
+  const canViewAll = perms.includes('view_all_sessions')
+  const sessionWhere = canViewAll ? {} : { user_id: userId }
 
   const [allSessions, totalAnswers, recentAnswers] = await Promise.all([
-    prisma.session.findMany({ orderBy: { created_at: 'desc' } }),
-    prisma.answer.count(),
+    prisma.session.findMany({ where: sessionWhere, orderBy: { created_at: 'desc' } }),
+    prisma.answer.count({
+      where: canViewAll ? {} : { session: { user_id: userId } },
+    }),
     prisma.answer.findMany({
+      where: canViewAll ? {} : { session: { user_id: userId } },
       select: { student_name: true, content: true, created_at: true, session_id: true },
       orderBy: { created_at: 'desc' },
       take: 6,
