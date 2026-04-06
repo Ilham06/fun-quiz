@@ -1,10 +1,9 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { getSocket } from '@/lib/socket'
 
 export default function EmojiBurst({ sessionId }) {
   const [bursts, setBursts] = useState([])
-  const supabase = createBrowserClient()
 
   const addBurst = useCallback((emoji) => {
     const id = Date.now() + Math.random()
@@ -16,20 +15,19 @@ export default function EmojiBurst({ sessionId }) {
   }, [])
 
   useEffect(() => {
-    const channel = supabase
-      .channel(`reactions:${sessionId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'reactions',
-        filter: `session_id=eq.${sessionId}`,
-      }, (payload) => {
-        addBurst(payload.new.emoji)
-      })
-      .subscribe()
+    const socket = getSocket()
+    socket.emit('join-session', sessionId)
 
-    return () => { supabase.removeChannel(channel) }
-  }, [sessionId, supabase, addBurst])
+    function onReaction(data) {
+      addBurst(data.emoji)
+    }
+
+    socket.on('reaction', onReaction)
+
+    return () => {
+      socket.off('reaction', onReaction)
+    }
+  }, [sessionId, addBurst])
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">

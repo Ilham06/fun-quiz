@@ -1,5 +1,5 @@
 import { verifySession } from '@/lib/dal'
-import { createServerClient } from '@/lib/supabase/server'
+import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
 
@@ -18,21 +18,18 @@ const TYPE_ICONS = {
 }
 
 export default async function DashboardPage() {
-  await verifySession()
+  const { userId } = await verifySession()
 
-  const supabase = createServerClient()
-
-  const [
-    { data: sessions },
-    { count: totalAnswers },
-    { data: recentAnswers },
-  ] = await Promise.all([
-    supabase.from('sessions').select('*').order('created_at', { ascending: false }),
-    supabase.from('answers').select('*', { count: 'exact', head: true }),
-    supabase.from('answers').select('student_name, content, created_at, session_id').order('created_at', { ascending: false }).limit(6),
+  const [allSessions, totalAnswers, recentAnswers] = await Promise.all([
+    prisma.session.findMany({ orderBy: { created_at: 'desc' } }),
+    prisma.answer.count(),
+    prisma.answer.findMany({
+      select: { student_name: true, content: true, created_at: true, session_id: true },
+      orderBy: { created_at: 'desc' },
+      take: 6,
+    }),
   ])
 
-  const allSessions = sessions || []
   const totalSessions = allSessions.length
   const activeSessions = allSessions.filter(s => s.is_active).length
   const participantCount = totalAnswers || 0
@@ -40,7 +37,7 @@ export default async function DashboardPage() {
   const sessionMap = {}
   for (const s of allSessions) sessionMap[s.id] = s
 
-  const recentActivities = (recentAnswers || []).map(a => ({
+  const recentActivities = recentAnswers.map(a => ({
     studentName: a.student_name || 'Anonim',
     content: a.content,
     sessionTitle: sessionMap[a.session_id]?.title || 'Sesi',
@@ -74,7 +71,6 @@ export default async function DashboardPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 lg:px-12 pt-10 pb-12">
-        {/* Welcome Header — per Stitch design */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-10">
           <div>
             <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 mb-2">
@@ -83,6 +79,18 @@ export default async function DashboardPage() {
             <p className="text-gray-500 text-lg">Kelola semua sesi quiz, ujian, dan feedback Anda</p>
           </div>
           <div className="flex gap-3 shrink-0">
+            <Link
+              href="/dashboard/users"
+              className="px-5 py-3 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all text-sm"
+            >
+              👥 Pengguna
+            </Link>
+            <Link
+              href="/dashboard/roles"
+              className="px-5 py-3 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all text-sm"
+            >
+              🔑 Role
+            </Link>
             <Link
               href="/dashboard/sessions/new"
               className="px-6 py-3 bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold rounded-xl shadow-md hover:opacity-90 transition-all flex items-center gap-2 text-sm"
@@ -93,9 +101,8 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Grid — 4 cards per Stitch */}
+        {/* Stats Grid */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {/* Total Sesi */}
           <div className="bg-white p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.02)] border border-gray-200">
             <div className="flex items-start justify-between mb-4">
               <div className="bg-gray-100 p-3 rounded-xl text-amber-600">
@@ -106,7 +113,6 @@ export default async function DashboardPage() {
             <h3 className="text-3xl font-bold text-gray-900">{totalSessions}</h3>
           </div>
 
-          {/* Sesi Aktif */}
           <div className="bg-white p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.02)] border border-gray-200 relative overflow-hidden">
             {activeSessions > 0 && (
               <div className="absolute top-4 right-4 flex items-center gap-1.5">
@@ -126,7 +132,6 @@ export default async function DashboardPage() {
             <h3 className="text-3xl font-bold text-gray-900">{activeSessions}</h3>
           </div>
 
-          {/* Total Jawaban */}
           <div className="bg-white p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.02)] border border-gray-200">
             <div className="flex items-start justify-between mb-4">
               <div className="bg-sky-50 p-3 rounded-xl text-sky-600">
@@ -137,7 +142,6 @@ export default async function DashboardPage() {
             <h3 className="text-3xl font-bold text-gray-900">{participantCount.toLocaleString('id-ID')}</h3>
           </div>
 
-          {/* Jenis Sesi */}
           <div className="bg-white p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.02)] border border-gray-200">
             <div className="flex items-start justify-between mb-4">
               <div className="bg-amber-50 p-3 rounded-xl text-amber-600">
@@ -154,9 +158,8 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Main Content Split — 2/3 + 1/3 per Stitch */}
+        {/* Sessions List */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Column: Sesi Terbaru (2/3) */}
           <section className="lg:col-span-3 space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-bold text-gray-900">Sesi Terbaru</h2>
@@ -185,12 +188,10 @@ export default async function DashboardPage() {
                     href={`/dashboard/sessions/${session.id}`}
                     className="bg-white p-5 rounded-2xl border border-gray-200 flex gap-5 items-center group hover:shadow-md transition-all"
                   >
-                    {/* Icon thumbnail */}
                     <div className="w-28 h-20 rounded-xl bg-gray-100 border border-gray-200 flex-shrink-0 flex items-center justify-center">
                       <span className="text-4xl">{icon}</span>
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {session.is_active ? (
@@ -220,7 +221,6 @@ export default async function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Action hint */}
                     <div className="shrink-0 hidden sm:flex">
                       <span className="px-4 py-2 border border-gray-200 text-gray-500 font-bold text-sm rounded-lg group-hover:bg-gray-50 transition-colors">
                         Kelola →
@@ -231,9 +231,6 @@ export default async function DashboardPage() {
               })
             )}
           </section>
-
-          {/* Column: Aktivitas Terbaru (1/3) — per Stitch */}
-         
         </div>
       </main>
     </div>

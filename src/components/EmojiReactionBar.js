@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { getSocket } from '@/lib/socket'
 
 const EMOJIS = ['👍', '❤️', '😂', '🔥', '👏', '🤔']
 
@@ -10,11 +11,16 @@ export default function EmojiReactionBar({ sessionId }) {
     if (cooldown) return
     setCooldown(true)
 
-    await fetch('/api/reactions', {
+    const res = await fetch('/api/reactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_id: sessionId, emoji }),
     })
+
+    if (res.ok) {
+      const reaction = await res.json()
+      getSocket().emit('new-reaction', reaction)
+    }
 
     setTimeout(() => setCooldown(false), 800)
   }

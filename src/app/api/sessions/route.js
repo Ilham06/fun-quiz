@@ -1,6 +1,6 @@
-import { createServerClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/dal'
+import { getSession, getPermissions } from '@/lib/dal'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -17,15 +17,13 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createServerClient()
-  const { data, error } = await supabase
-    .from('sessions')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const perms = await getPermissions()
+  const where = perms.includes('view_all_sessions') ? {} : { user_id: session.userId }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  const data = await prisma.session.findMany({
+    where,
+    orderBy: { created_at: 'desc' },
+  })
 
   return NextResponse.json(data)
 }
@@ -42,30 +40,25 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Judul wajib diisi.' }, { status: 400 })
   }
 
-  const supabase = createServerClient()
-
   let code
   let attempts = 0
   while (attempts < 10) {
     code = generateCode()
-    const { data: existing } = await supabase
-      .from('sessions')
-      .select('id')
-      .eq('code', code)
-      .single()
+    const existing = await prisma.session.findUnique({ where: { code } })
     if (!existing) break
     attempts++
   }
 
-  const { data, error } = await supabase
-    .from('sessions')
-    .insert({ title: title.trim(), description, type: type || 'quiz', theme: theme || 'default', code })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  const data = await prisma.session.create({
+    data: {
+      title: title.trim(),
+      description: description || null,
+      type: type || 'quiz',
+      theme: theme || 'default',
+      code,
+      user_id: session.userId,
+    },
+  })
 
   return NextResponse.json(data, { status: 201 })
 }

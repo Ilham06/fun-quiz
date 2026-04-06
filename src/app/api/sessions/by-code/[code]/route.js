@@ -1,17 +1,15 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function GET(_req, { params }) {
   const { code } = await params
-  const supabase = createServerClient()
 
-  const { data, error } = await supabase
-    .from('sessions')
-    .select('id, code, title')
-    .eq('code', code.toUpperCase())
-    .single()
+  const data = await prisma.session.findUnique({
+    where: { code: code.toUpperCase() },
+    select: { id: true, code: true, title: true },
+  })
 
-  if (error || !data) {
+  if (!data) {
     return NextResponse.json({ error: 'Session tidak ditemukan.' }, { status: 404 })
   }
 

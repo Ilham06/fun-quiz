@@ -1,6 +1,6 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/dal'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function POST(request, { params }) {
   const authSession = await getSession()
@@ -15,26 +15,18 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Teks pertanyaan wajib diisi.' }, { status: 400 })
   }
 
-  const supabase = createServerClient()
-
-  const { data, error } = await supabase
-    .from('questions')
-    .insert({
+  const data = await prisma.question.create({
+    data: {
       session_id,
       text: text.trim(),
       type: type || 'open',
-      options: options || null,
+      options: options || undefined,
       correct_answer: correct_answer || null,
       timer_seconds: timer_seconds || 0,
       show_answers: show_answers !== false,
       order: order ?? 0,
-    })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+    },
+  })
 
   return NextResponse.json(data, { status: 201 })
 }

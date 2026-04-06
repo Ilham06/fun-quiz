@@ -1,5 +1,5 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function POST(request) {
   const { session_id, question_id, student_name, left_at, returned_at, duration_seconds } = await request.json()
@@ -11,24 +11,16 @@ export async function POST(request) {
     )
   }
 
-  const supabase = createServerClient()
-
-  const { data, error } = await supabase
-    .from('tab_violations')
-    .insert({
+  const data = await prisma.tabViolation.create({
+    data: {
       session_id,
       question_id: question_id || null,
       student_name: student_name?.trim() || null,
-      left_at,
-      returned_at: returned_at || null,
+      left_at: new Date(left_at),
+      returned_at: returned_at ? new Date(returned_at) : null,
       duration_seconds: duration_seconds || null,
-    })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+    },
+  })
 
   return NextResponse.json(data, { status: 201 })
 }

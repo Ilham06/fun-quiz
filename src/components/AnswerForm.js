@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { getSocket } from '@/lib/socket'
 
 function AnswerTimer({ timerSeconds, questionId, onExpired }) {
   const [elapsed, setElapsed] = useState(0)
@@ -80,6 +81,8 @@ export default function AnswerForm({ session, activeQuestion }) {
     })
 
     if (res.ok) {
+      const answer = await res.json()
+      getSocket().emit('new-answer', answer)
       setSubmitted(true)
     } else {
       const data = await res.json()

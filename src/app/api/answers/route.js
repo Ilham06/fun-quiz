@@ -1,5 +1,5 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function POST(request) {
   const { session_id, question_id, student_name, content } = await request.json()
@@ -11,15 +11,12 @@ export async function POST(request) {
     )
   }
 
-  const supabase = createServerClient()
+  const sessionData = await prisma.session.findUnique({
+    where: { id: session_id },
+    select: { id: true, is_active: true },
+  })
 
-  const { data: sessionData, error: sessionError } = await supabase
-    .from('sessions')
-    .select('id, is_active')
-    .eq('id', session_id)
-    .single()
-
-  if (sessionError || !sessionData) {
+  if (!sessionData) {
     return NextResponse.json({ error: 'Session tidak ditemukan.' }, { status: 404 })
   }
 
@@ -27,20 +24,14 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Session tidak aktif.' }, { status: 403 })
   }
 
-  const { data, error } = await supabase
-    .from('answers')
-    .insert({
+  const data = await prisma.answer.create({
+    data: {
       session_id,
       question_id: question_id || null,
       student_name: student_name?.trim() || null,
       content: content.trim(),
-    })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+    },
+  })
 
   return NextResponse.json(data, { status: 201 })
 }
