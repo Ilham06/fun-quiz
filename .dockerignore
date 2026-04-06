@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.env
+.env.local
+.env*.local
+.env.docker.example
+npm-debug.log*
+README.md
+.vscode
+.cursor
+supabase
+mcps
+agent-transcripts
+terminals

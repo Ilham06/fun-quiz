@@ -31,7 +31,7 @@ export async function createSession(userId, roleId) {
 
   cookieStore.set('session', session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.COOKIE_SECURE === 'true',
     expires: expiresAt,
     sameSite: 'lax',
     path: '/',
