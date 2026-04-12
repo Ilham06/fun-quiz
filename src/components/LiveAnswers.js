@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { getSocket } from '@/lib/socket'
 
 const SOUND_URL = 'data:audio/wav;base64,UklGRlQFAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTAFAACAgICAgICAgICAgICAgICAgICAgICBhY2YqbS+xMnL0M7NzcrHxL60pZWJgX15eHl+hpCdrbnEzNDTz8jBuK2hl4uDfnt8f4eSn6y4xM3T1dHLxLqwnJCGf3x8gIqWo7C7xc7U1dHKwrisnpKIgX1+goqVoq67xc7T1dHKwbisnpKIgX1+goqVoq67xc7T1dHKwbesnpKIgH1+goqVoq67xc7T1dDKwbisnpKIgH1+goqVoq67xc7T1dDJwbisnpKIgH1+goqV'
 
@@ -50,7 +50,6 @@ export default function LiveAnswers({ sessionId, questionId = null, initialAnswe
   const [likedIds, setLikedIds] = useState(new Set())
   const [soundEnabled, setSoundEnabled] = useState(true)
   const containerRef = useRef(null)
-  const supabase = createBrowserClient()
   const audioRef = useRef(null)
   const t = THEMES[variant] || THEMES.dark
 
@@ -67,49 +66,46 @@ export default function LiveAnswers({ sessionId, questionId = null, initialAnswe
   }, [soundEnabled])
 
   useEffect(() => {
-    const channel = supabase
-      .channel(`answers:${sessionId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'answers',
-        filter: `session_id=eq.${sessionId}`,
-      }, (payload) => {
-        const newAnswer = payload.new
-        const matchesQuestion = questionId
-          ? newAnswer.question_id === questionId
-          : newAnswer.question_id === null
-        if (!matchesQuestion) return
-        setAnswers((prev) => {
-          const updated = [newAnswer, ...prev]
-          return updated.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
-        })
-        playSound()
-        setNewIds((prev) => {
-          const next = new Set(prev)
-          next.add(newAnswer.id)
-          setTimeout(() => {
-            setNewIds((p) => { const n = new Set(p); n.delete(newAnswer.id); return n })
-          }, 2500)
-          return next
-        })
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'answers',
-        filter: `session_id=eq.${sessionId}`,
-      }, (payload) => {
-        const updated = payload.new
-        setAnswers((prev) => {
-          const next = prev.map((a) => a.id === updated.id ? { ...a, upvotes: updated.upvotes } : a)
-          return next.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
-        })
-      })
-      .subscribe((status) => setConnected(status === 'SUBSCRIBED'))
+    const socket = getSocket()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [sessionId, questionId, supabase, playSound])
+    socket.emit('join-session', sessionId)
+
+    function onConnect() { setConnected(true) }
+    function onDisconnect() { setConnected(false) }
+
+    function onAnswer(newAnswer) {
+      const matchesQuestion = questionId
+        ? newAnswer.question_id === questionId
+        : newAnswer.question_id === null
+      if (!matchesQuestion) return
+      setAnswers((prev) => {
+        if (prev.some(a => a.id === newAnswer.id)) return prev
+        const updated = [newAnswer, ...prev]
+        return updated.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+      })
+      playSound()
+      setNewIds((prev) => {
+        const next = new Set(prev)
+        next.add(newAnswer.id)
+        setTimeout(() => {
+          setNewIds((p) => { const n = new Set(p); n.delete(newAnswer.id); return n })
+        }, 2500)
+        return next
+      })
+    }
+
+    socket.on('connect', onConnect)
+    socket.on('disconnect', onDisconnect)
+    socket.on('answer', onAnswer)
+    if (socket.connected) setConnected(true)
+
+    return () => {
+      socket.off('connect', onConnect)
+      socket.off('disconnect', onDisconnect)
+      socket.off('answer', onAnswer)
+      socket.emit('leave-session', sessionId)
+    }
+  }, [sessionId, questionId, playSound])
 
   async function handleLike(id) {
     if (likedIds.has(id)) return

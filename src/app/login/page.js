@@ -46,8 +46,8 @@ export default function LoginPage() {
             </div>
             <span className="text-gray-600 font-bold text-sm group-hover:text-gray-900 transition-colors">funquiz</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Login Pengajar</h1>
-          <p className="text-gray-500 text-sm mt-1">Kelola sesi quiz dan feedback</p>
+          <h1 className="text-2xl font-bold text-gray-900">Login</h1>
+          <p className="text-gray-500 text-sm mt-1">Masuk untuk mengelola sesi</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 space-y-4">

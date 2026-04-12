@@ -1,6 +1,6 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/dal'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function PATCH(request, { params }) {
   const authSession = await getSession()
@@ -10,23 +10,16 @@ export async function PATCH(request, { params }) {
 
   const { qid } = await params
   const body = await request.json()
-  const supabase = createServerClient()
 
   const allowed = ['text', 'type', 'options', 'correct_answer', 'order', 'is_active', 'timer_seconds', 'show_answers']
   const updates = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   )
 
-  const { data, error } = await supabase
-    .from('questions')
-    .update(updates)
-    .eq('id', qid)
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  const data = await prisma.question.update({
+    where: { id: qid },
+    data: updates,
+  })
 
   return NextResponse.json(data)
 }
@@ -38,13 +31,6 @@ export async function DELETE(_req, { params }) {
   }
 
   const { qid } = await params
-  const supabase = createServerClient()
-
-  const { error } = await supabase.from('questions').delete().eq('id', qid)
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
+  await prisma.question.delete({ where: { id: qid } })
   return NextResponse.json({ ok: true })
 }

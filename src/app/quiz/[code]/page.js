@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import AnswerForm from '@/components/AnswerForm'
 import EmojiReactionBar from '@/components/EmojiReactionBar'
@@ -8,21 +8,17 @@ import { getThemeConfig } from '@/lib/themes'
 
 export default async function QuizPage({ params }) {
   const { code } = await params
-  const supabase = createServerClient()
 
-  const { data: session, error } = await supabase
-    .from('sessions')
-    .select('*')
-    .eq('code', code.toUpperCase())
-    .single()
+  const session = await prisma.session.findUnique({
+    where: { code: code.toUpperCase() },
+  })
 
-  if (error || !session) notFound()
+  if (!session) notFound()
 
-  const { data: questions } = await supabase
-    .from('questions')
-    .select('*')
-    .eq('session_id', session.id)
-    .order('order', { ascending: true })
+  const questions = await prisma.question.findMany({
+    where: { session_id: session.id },
+    orderBy: { order: 'asc' },
+  })
 
   const theme = getThemeConfig(session.theme)
 
@@ -49,23 +45,20 @@ export default async function QuizPage({ params }) {
   /* ── Discussion / Quiz type — Stitch "Premium Discussion Input" ── */
   const activeQuestion = questions?.find((q) => q.is_active) || null
 
-  let answersQuery = supabase
-    .from('answers')
-    .select('*')
-    .eq('session_id', session.id)
-    .order('created_at', { ascending: false })
-
+  const answersWhere = { session_id: session.id }
   if (activeQuestion) {
-    answersQuery = answersQuery.eq('question_id', activeQuestion.id)
+    answersWhere.question_id = activeQuestion.id
   } else {
-    answersQuery = answersQuery.is('question_id', null)
+    answersWhere.question_id = null
   }
 
-  const { data: answers } = await answersQuery
+  const answers = await prisma.answer.findMany({
+    where: answersWhere,
+    orderBy: { created_at: 'desc' },
+  })
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-[#f8f9fa] text-[#191c1d] antialiased">
-      {/* Sticky TopNavBar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div className="flex justify-between items-center w-full px-4 md:px-8 h-14 md:h-16 max-w-3xl mx-auto">
           <span className="text-amber-600 font-black text-xl md:text-2xl tracking-tighter">FunQuiz</span>
@@ -86,10 +79,8 @@ export default async function QuizPage({ params }) {
           </div>
         ) : (
           <div className="space-y-6 md:space-y-8 animate-fade-up">
-            {/* Premium Discussion Card */}
             <div className="bg-white rounded-2xl md:rounded-[2rem] shadow-[0px_12px_32px_rgba(25,28,29,0.04)] overflow-hidden">
               <div className="p-5 md:p-12">
-                {/* Header: Badge + Title + Code */}
                 <div className="mb-6 md:mb-10">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="inline-flex items-center px-2.5 py-1 bg-gray-100 rounded-full">
@@ -107,7 +98,6 @@ export default async function QuizPage({ params }) {
                   )}
                 </div>
 
-                {/* Active question display */}
                 {activeQuestion && (
                   <div className="bg-gray-50 rounded-xl md:rounded-2xl p-4 md:p-6 mb-6 md:mb-8">
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 md:mb-2">Pertanyaan</p>
@@ -115,17 +105,14 @@ export default async function QuizPage({ params }) {
                   </div>
                 )}
 
-                {/* Answer Form */}
                 <AnswerForm session={session} activeQuestion={activeQuestion} theme={theme} />
               </div>
             </div>
 
-            {/* Floating Emoji Reaction Bar */}
             <div className="flex justify-center -mt-10 md:-mt-14 relative z-10">
               <EmojiReactionBar sessionId={session.id} />
             </div>
 
-            {/* Recent Answers Feed */}
             {(answers?.length || 0) > 0 && (
               <section className="mt-4 md:mt-8 space-y-4 md:space-y-6">
                 <div className="flex items-center justify-between px-1">

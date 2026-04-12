@@ -1,5 +1,5 @@
-import { verifySession } from '@/lib/dal'
-import { createServerClient } from '@/lib/supabase/server'
+import { verifySession, getPermissions } from '@/lib/dal'
+import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SessionControls from '@/components/SessionControls'
@@ -17,52 +17,38 @@ const TYPE_META = {
 }
 
 export default async function SessionDetailPage({ params }) {
-  await verifySession()
+  const { userId } = await verifySession()
+  const perms = await getPermissions()
 
   const { id } = await params
-  const supabase = createServerClient()
 
-  const { data: session, error } = await supabase
-    .from('sessions')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const session = await prisma.session.findUnique({ where: { id } })
+  if (!session) notFound()
+  if (!perms.includes('view_all_sessions') && session.user_id !== userId) notFound()
 
-  if (error || !session) notFound()
+  const questions = await prisma.question.findMany({
+    where: { session_id: id },
+    orderBy: { order: 'asc' },
+  })
 
-  const { data: questions } = await supabase
-    .from('questions')
-    .select('*')
-    .eq('session_id', id)
-    .order('order', { ascending: true })
-
-  let answersQuery = supabase
-    .from('answers')
-    .select('*')
-    .eq('session_id', id)
-    .order('created_at', { ascending: false })
-
-  if (session.type !== 'exam') {
-    answersQuery = answersQuery.limit(50)
-  }
-
-  const { data: answers } = await answersQuery
+  const answers = await prisma.answer.findMany({
+    where: { session_id: id },
+    orderBy: { created_at: 'desc' },
+    ...(session.type !== 'exam' ? { take: 50 } : {}),
+  })
 
   let violations = []
   if (session.type === 'exam') {
-    const { data: v } = await supabase
-      .from('tab_violations')
-      .select('*')
-      .eq('session_id', id)
-      .order('created_at', { ascending: false })
-    violations = v || []
+    violations = await prisma.tabViolation.findMany({
+      where: { session_id: id },
+      orderBy: { created_at: 'desc' },
+    })
   }
 
   const meta = TYPE_META[session.type] || TYPE_META.quiz
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
-      {/* Stitch: Top Navigation */}
       <nav className="w-full bg-white border-b border-gray-100 py-4 px-8 flex justify-between items-center">
         <div className="flex items-center space-x-4 text-sm font-medium">
           <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1.5">
@@ -76,7 +62,6 @@ export default async function SessionDetailPage({ params }) {
       </nav>
 
       <main className="max-w-7xl mx-auto py-10 px-6 space-y-6">
-        {/* Stitch: Hero Section */}
         <section className="bg-white rounded-2xl p-8 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100">
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center space-x-3">
@@ -113,7 +98,6 @@ export default async function SessionDetailPage({ params }) {
           </div>
         </section>
 
-        {/* Shuffle settings — exam only */}
         {session.type === 'exam' && (
           <ShuffleSettings
             sessionId={id}
@@ -122,19 +106,15 @@ export default async function SessionDetailPage({ params }) {
           />
         )}
 
-        {/* Stitch: Alert Section — Tab Violations */}
         {session.type === 'exam' && violations.length > 0 && (
           <ViolationsPanel violations={violations} questions={questions || []} />
         )}
 
-        {/* Stitch: Two Column Grid — 7/5 split */}
         <div className="grid grid-cols-12 gap-6">
-          {/* Left: Questions (col-span-7) */}
           <div className="col-span-12 lg:col-span-7 bg-white rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100">
             <QuestionManager sessionId={id} initialQuestions={questions || []} sessionType={session.type} />
           </div>
 
-          {/* Right: Answers / Student Submissions (col-span-5) */}
           <div className="col-span-12 lg:col-span-5 bg-white rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100">
             {session.type === 'exam' ? (
               <ExamAnswersByStudent answers={answers || []} questions={questions || []} sessionName={session.title} />

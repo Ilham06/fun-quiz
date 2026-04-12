@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "4000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+
+  seed:
+    build: .
+    profiles: ["setup"]
+    env_file:
+      - .env
+    command: >
+      sh -c "npx prisma db push --skip-generate && node --experimental-strip-types prisma/seed.mjs"

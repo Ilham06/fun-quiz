@@ -1,30 +1,22 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function POST(_req, { params }) {
   const { id } = await params
-  const supabase = createServerClient()
 
-  const { data: existing } = await supabase
-    .from('answers')
-    .select('upvotes')
-    .eq('id', id)
-    .single()
+  const existing = await prisma.answer.findUnique({
+    where: { id },
+    select: { upvotes: true },
+  })
 
   if (!existing) {
     return NextResponse.json({ error: 'Answer not found' }, { status: 404 })
   }
 
-  const { data, error } = await supabase
-    .from('answers')
-    .update({ upvotes: existing.upvotes + 1 })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  const data = await prisma.answer.update({
+    where: { id },
+    data: { upvotes: { increment: 1 } },
+  })
 
   return NextResponse.json(data)
 }

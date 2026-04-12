@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { getSocket } from '@/lib/socket'
 import QRCode from '@/components/QRCode'
 import EmojiBurst from '@/components/EmojiBurst'
 import LiveAnswers from '@/components/LiveAnswers'
@@ -12,40 +12,31 @@ export default function DisplayClient({ session, activeQuestion, initialAnswers,
   const [tab, setTab] = useState('live')
   const [liveAnswers, setLiveAnswers] = useState(initialAnswers)
   const isMultipleChoice = activeQuestion?.type === 'multiple_choice' && activeQuestion?.options?.length > 0
-  const supabase = createBrowserClient()
   const questionId = activeQuestion?.id || null
 
   useEffect(() => {
-    const channel = supabase
-      .channel(`display-answers:${session.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'answers',
-        filter: `session_id=eq.${session.id}`,
-      }, (payload) => {
-        const incoming = payload.new
-        const matchesQuestion = questionId
-          ? incoming.question_id === questionId
-          : incoming.question_id === null
-        if (matchesQuestion) {
-          setLiveAnswers((prev) => [incoming, ...prev])
-        }
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'answers',
-        filter: `session_id=eq.${session.id}`,
-      }, (payload) => {
-        setLiveAnswers((prev) =>
-          prev.map((a) => a.id === payload.new.id ? { ...a, upvotes: payload.new.upvotes } : a)
-        )
-      })
-      .subscribe()
+    const socket = getSocket()
+    socket.emit('join-session', session.id)
 
-    return () => { supabase.removeChannel(channel) }
-  }, [session.id, questionId, supabase])
+    function onAnswer(incoming) {
+      const matchesQuestion = questionId
+        ? incoming.question_id === questionId
+        : incoming.question_id === null
+      if (matchesQuestion) {
+        setLiveAnswers((prev) => {
+          if (prev.some(a => a.id === incoming.id)) return prev
+          return [incoming, ...prev]
+        })
+      }
+    }
+
+    socket.on('answer', onAnswer)
+
+    return () => {
+      socket.off('answer', onAnswer)
+      socket.emit('leave-session', session.id)
+    }
+  }, [session.id, questionId])
 
   const tabs = [
     { id: 'live', label: 'Live' },

@@ -1,28 +1,21 @@
-import { createServerClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/dal'
+import { getSession, getPermissions } from '@/lib/dal'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function GET(_req, { params }) {
   const { id } = await params
-  const supabase = createServerClient()
 
-  const { data: session, error: sessionError } = await supabase
-    .from('sessions')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (sessionError || !session) {
+  const session = await prisma.session.findUnique({ where: { id } })
+  if (!session) {
     return NextResponse.json({ error: 'Session tidak ditemukan.' }, { status: 404 })
   }
 
-  const { data: questions } = await supabase
-    .from('questions')
-    .select('*')
-    .eq('session_id', id)
-    .order('order', { ascending: true })
+  const questions = await prisma.question.findMany({
+    where: { session_id: id },
+    orderBy: { order: 'asc' },
+  })
 
-  return NextResponse.json({ ...session, questions: questions || [] })
+  return NextResponse.json({ ...session, questions })
 }
 
 export async function PATCH(request, { params }) {
@@ -32,8 +25,16 @@ export async function PATCH(request, { params }) {
   }
 
   const { id } = await params
+  const perms = await getPermissions()
+
+  if (!perms.includes('manage_all_sessions')) {
+    const existing = await prisma.session.findUnique({ where: { id } })
+    if (!existing || existing.user_id !== authSession.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
+
   const body = await request.json()
-  const supabase = createServerClient()
 
   const allowed = ['title', 'description', 'type', 'is_active', 'theme', 'shuffle_questions', 'shuffle_options']
   const updates = Object.fromEntries(
@@ -44,17 +45,7 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: 'Tidak ada field yang valid.' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
-    .from('sessions')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
+  const data = await prisma.session.update({ where: { id }, data: updates })
   return NextResponse.json(data)
 }
 
@@ -65,13 +56,15 @@ export async function DELETE(_req, { params }) {
   }
 
   const { id } = await params
-  const supabase = createServerClient()
+  const perms = await getPermissions()
 
-  const { error } = await supabase.from('sessions').delete().eq('id', id)
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!perms.includes('manage_all_sessions')) {
+    const existing = await prisma.session.findUnique({ where: { id } })
+    if (!existing || existing.user_id !== authSession.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
   }
 
+  await prisma.session.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }
