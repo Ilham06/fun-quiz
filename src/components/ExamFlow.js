@@ -893,13 +893,17 @@ function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredId
   const gaugeArc = 157
   const gaugeFilled = hasScore ? (gaugeArc * scorePercent) / 100 : 0
 
-  const feedbackText = scorePercent >= 80
-    ? 'Luar Biasa! Kerja Bagus! 🎉'
-    : scorePercent >= 60
-      ? 'Bagus! Hampir Sempurna!'
-      : scorePercent >= 40
-        ? 'Cukup Baik, Terus Belajar!'
-        : 'Tetap Semangat & Terus Belajar'
+  const feedbackText = scorePercent === 100
+    ? 'Sempurna! Kamu melakukan yang terbaik!'
+    : scorePercent >= 80
+      ? 'Hebat! Kamu melampaui batas aman!'
+      : scorePercent >= 60
+        ? 'Cukup bagus, lebih semangat lagi yaa!'
+        : scorePercent >= 40
+          ? 'Tetap semangat, terus belajar lagi yaa!'
+          : scorePercent > 0
+            ? 'Jangan menyerah, terus belajar lagi!'
+            : 'SERIUS GADA YANG BENAR SAMA SEKALI?'
 
   return (
     <div className="animate-fade-up relative">
