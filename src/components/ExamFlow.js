@@ -815,7 +815,7 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
       <form onSubmit={onStart} className="bg-white border border-gray-200 shadow-[0px_12px_32px_rgba(25,28,29,0.04)] rounded-xl p-8 space-y-5">
         <div>
           <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
-            Nama Lengkap
+            Identitas
           </label>
           <input
             type="text"
@@ -824,14 +824,14 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
             required
             maxLength={50}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-100 border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:bg-white focus:outline-none text-gray-900 text-lg placeholder:text-gray-400 transition-all"
-            placeholder="Masukkan nama lengkap/NIM/Kelas"
+            placeholder="Masukkan Nama Lengkap/NIM/Kelas"
           />
         </div>
         <div className="text-xs text-gray-500 mb-2">
           <p>
             <span className="font-bold text-gray-800">Catatan:</span>
             <br />
-            <span className="text-gray-500">Masukkan nama lengkap/NIM/Kelas.</span>
+            <span className="text-gray-500">Masukkan Nama Lengkap/NIM/Kelas.</span>
           </p>
         </div>
         <button
