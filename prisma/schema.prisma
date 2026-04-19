@@ -66,6 +66,7 @@ model Session {
   is_active         Boolean        @default(false)
   shuffle_questions Boolean        @default(false)
   shuffle_options   Boolean        @default(false)
+  quiz_mode         String         @default("one_by_one")
   created_at        DateTime       @default(now())
   user_id           String
   user              User           @relation(fields: [user_id], references: [id])

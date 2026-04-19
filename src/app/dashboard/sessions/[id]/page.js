@@ -103,6 +103,7 @@ export default async function SessionDetailPage({ params }) {
             sessionId={id}
             initialShuffleQuestions={session.shuffle_questions ?? false}
             initialShuffleOptions={session.shuffle_options ?? false}
+            initialQuizMode={session.quiz_mode ?? 'one_by_one'}
           />
         )}
 
