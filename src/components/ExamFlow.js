@@ -474,6 +474,7 @@ function AllAtOnceExam({ session, questions, theme }) {
   const [loading, setLoading] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [error, setError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
   const questionRefs = useRef({})
 
   const shuffledQuestions = useMemo(() => {
@@ -638,7 +639,7 @@ function AllAtOnceExam({ session, questions, theme }) {
             </p>
           </div>
           <button
-            onClick={handleSubmitAll}
+            onClick={() => setShowConfirm(true)}
             disabled={loading || answeredCount === 0}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 text-sm"
           >
@@ -750,7 +751,7 @@ function AllAtOnceExam({ session, questions, theme }) {
             )}
           </div>
           <button
-            onClick={handleSubmitAll}
+            onClick={() => setShowConfirm(true)}
             disabled={loading || answeredCount === 0}
             className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 text-base"
           >
@@ -759,6 +760,45 @@ function AllAtOnceExam({ session, questions, theme }) {
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !loading && setShowConfirm(false)} />
+          <div className="relative bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-w-md w-full p-8 animate-fade-up">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200">
+                <span className="text-3xl">📋</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Kumpulkan Jawaban?</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Kamu telah menjawab <span className="font-bold text-gray-800">{answeredCount}</span> dari <span className="font-bold text-gray-800">{totalQuestions}</span> soal.
+                {answeredCount < totalQuestions && (
+                  <span className="block text-amber-600 font-medium mt-1">
+                    {totalQuestions - answeredCount} soal belum dijawab dan akan dikosongkan.
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                disabled={loading}
+                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 text-sm"
+              >
+                Periksa Lagi
+              </button>
+              <button
+                onClick={() => { setShowConfirm(false); handleSubmitAll() }}
+                disabled={loading}
+                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 text-sm"
+              >
+                {loading ? 'Mengirim...' : 'Ya, Kumpulkan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
