@@ -815,8 +815,8 @@ function InactiveState() {
       <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-200">
         <span className="text-3xl">⏳</span>
       </div>
-      <h2 className="text-lg font-bold text-gray-900 mb-1">Ujian belum dimulai</h2>
-      <p className="text-gray-500 text-sm">Tunggu pengajar mengaktifkan sesi ujian.</p>
+      <h2 className="text-lg font-bold text-gray-900 mb-1">Quiz belum dimulai</h2>
+      <p className="text-gray-500 text-sm">Tunggu pengajar mengaktifkan sesi Quiz.</p>
     </div>
   )
 }
@@ -828,7 +828,7 @@ function EmptyState() {
         <span className="text-3xl">📋</span>
       </div>
       <h2 className="text-lg font-bold text-gray-900 mb-1">Belum ada soal</h2>
-      <p className="text-gray-500 text-sm">Pengajar belum menambahkan soal ujian.</p>
+      <p className="text-gray-500 text-sm">Pengajar belum menambahkan soal quiz.</p>
     </div>
   )
 }
@@ -893,13 +893,13 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
           type="submit"
           className="w-full bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-md text-lg"
         >
-          Mulai Ujian →
+          Mulai Quiz →
         </button>
       </form>
 
       {showConfirmStart && (
         <ConfirmModal
-          title="Mulai Ujian?"
+          title="Mulai Quiz?"
           icon="🚀"
           onCancel={() => setShowConfirmStart(false)}
           onConfirm={handleConfirmStart}
@@ -908,7 +908,7 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
           disabled={false}
         >
           <div className="text-gray-500 text-sm leading-relaxed space-y-2">
-            <p>Kamu akan memulai ujian sebagai:</p>
+            <p>Kamu akan memulai quiz sebagai:</p>
             <p className="font-bold text-gray-900 text-base">{name.trim()}</p>
             <p className="text-amber-600 text-xs font-medium mt-2">Pastikan nama sudah benar karena tidak bisa diubah setelah mulai.</p>
           </div>
@@ -959,7 +959,7 @@ function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredId
               <line x1="85" y1="40" x2="75" y2="45" stroke="#FBBF24" strokeWidth="4" strokeLinecap="round" />
             </svg>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Ujian Selesai!</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Quiz Selesai!</h1>
           <p className="text-gray-500 text-sm max-w-md mx-auto">
             Kamu telah menjawab {answeredIds.size} dari {totalQuestions} soal.<br />
             Terima kasih, {name}.
@@ -1066,7 +1066,7 @@ function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredId
           {violationCount > 0 && (
             <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 text-center">
               <p className="text-red-700 text-sm">
-                Kamu tercatat meninggalkan halaman <span className="font-bold text-red-800">{violationCount}x</span> selama ujian.
+                Kamu tercatat meninggalkan halaman <span className="font-bold text-red-800">{violationCount}x</span> selama quiz.
               </p>
             </div>
           )}

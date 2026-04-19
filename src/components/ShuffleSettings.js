@@ -49,7 +49,7 @@ export default function ShuffleSettings({ sessionId, initialShuffleQuestions, in
           <span className="text-base">⚙️</span>
         </div>
         <div>
-          <h3 className="text-sm font-bold text-gray-900">Konfigurasi Ujian</h3>
+          <h3 className="text-sm font-bold text-gray-900">Konfigurasi Quiz</h3>
           <p className="text-[11px] text-gray-500">Atur mode pengerjaan, acak soal & jawaban</p>
         </div>
       </div>
