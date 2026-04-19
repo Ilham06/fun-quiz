@@ -32,7 +32,7 @@ export default async function QuizPage({ params }) {
             <span className="font-semibold text-gray-900 hidden md:inline truncate max-w-[260px]">{session.title}</span>
           </div>
           <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full uppercase tracking-wider shrink-0">
-            Ujian • {session.code}
+            Quiz • {session.code}
           </span>
         </header>
         <main className="flex-1 max-w-4xl mx-auto w-full px-4 md:px-6 py-5 md:py-12">
