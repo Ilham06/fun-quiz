@@ -36,7 +36,7 @@ export async function PATCH(request, { params }) {
 
   const body = await request.json()
 
-  const allowed = ['title', 'description', 'type', 'is_active', 'theme', 'shuffle_questions', 'shuffle_options']
+  const allowed = ['title', 'description', 'type', 'is_active', 'theme', 'shuffle_questions', 'shuffle_options', 'quiz_mode']
   const updates = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   )
