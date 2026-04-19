@@ -474,7 +474,6 @@ function AllAtOnceExam({ session, questions, theme }) {
   const [loading, setLoading] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [error, setError] = useState('')
-  const [showConfirm, setShowConfirm] = useState(false)
   const questionRefs = useRef({})
 
   const shuffledQuestions = useMemo(() => {
@@ -563,6 +562,14 @@ function AllAtOnceExam({ session, questions, theme }) {
     }
   }
 
+  function trySubmit() {
+    const unanswered = totalQuestions - answeredCount
+    const msg = unanswered > 0
+      ? `Kamu menjawab ${answeredCount} dari ${totalQuestions} soal (${unanswered} belum dijawab).\n\nYakin ingin mengumpulkan?`
+      : `Kamu telah menjawab semua ${totalQuestions} soal.\n\nYakin ingin mengumpulkan?`
+    if (window.confirm(msg)) handleSubmitAll()
+  }
+
   async function handleSubmitAll() {
     setError('')
     setLoading(true)
@@ -639,7 +646,7 @@ function AllAtOnceExam({ session, questions, theme }) {
             </p>
           </div>
           <button
-            onClick={() => setShowConfirm(true)}
+            onClick={trySubmit}
             disabled={loading || answeredCount === 0}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 text-sm"
           >
@@ -751,7 +758,7 @@ function AllAtOnceExam({ session, questions, theme }) {
             )}
           </div>
           <button
-            onClick={() => setShowConfirm(true)}
+            onClick={trySubmit}
             disabled={loading || answeredCount === 0}
             className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 text-base"
           >
@@ -761,44 +768,6 @@ function AllAtOnceExam({ session, questions, theme }) {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !loading && setShowConfirm(false)} />
-          <div className="relative bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-w-md w-full p-8 animate-fade-up">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200">
-                <span className="text-3xl">📋</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Kumpulkan Jawaban?</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Kamu telah menjawab <span className="font-bold text-gray-800">{answeredCount}</span> dari <span className="font-bold text-gray-800">{totalQuestions}</span> soal.
-                {answeredCount < totalQuestions && (
-                  <span className="block text-amber-600 font-medium mt-1">
-                    {totalQuestions - answeredCount} soal belum dijawab dan akan dikosongkan.
-                  </span>
-                )}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                disabled={loading}
-                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 text-sm"
-              >
-                Periksa Lagi
-              </button>
-              <button
-                onClick={() => { setShowConfirm(false); handleSubmitAll() }}
-                disabled={loading}
-                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 text-sm"
-              >
-                {loading ? 'Mengirim...' : 'Ya, Kumpulkan'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -806,6 +775,39 @@ function AllAtOnceExam({ session, questions, theme }) {
 /* ════════════════════════════════════════════════════════════════════
    SHARED SUB-COMPONENTS
    ════════════════════════════════════════════════════════════════════ */
+
+function ConfirmModal({ title, icon, children, onCancel, onConfirm, cancelText, confirmText, disabled }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !disabled && onCancel()} />
+      <div className="relative z-10 bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-w-md w-full p-8">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200">
+            <span className="text-3xl">{icon}</span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+          {children}
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={disabled}
+            className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 text-sm"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={disabled}
+            className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 text-sm"
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function InactiveState() {
   return (
@@ -832,6 +834,19 @@ function EmptyState() {
 }
 
 function StartScreen({ session, name, setName, onStart, totalQuestions, questions, allAtOnce }) {
+  const [showConfirmStart, setShowConfirmStart] = useState(false)
+
+  function handleFormSubmit(e) {
+    e.preventDefault()
+    if (!name.trim()) return
+    setShowConfirmStart(true)
+  }
+
+  function handleConfirmStart() {
+    setShowConfirmStart(false)
+    onStart({ preventDefault: () => {} })
+  }
+
   return (
     <div className="animate-fade-up max-w-lg mx-auto space-y-6 py-6">
       <div className="bg-white border border-gray-200 shadow-[0px_12px_32px_rgba(25,28,29,0.04)] rounded-xl p-8 md:p-12 text-center">
@@ -852,7 +867,7 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
         </div>
       </div>
 
-      <form onSubmit={onStart} className="bg-white border border-gray-200 shadow-[0px_12px_32px_rgba(25,28,29,0.04)] rounded-xl p-8 space-y-5">
+      <form onSubmit={handleFormSubmit} className="bg-white border border-gray-200 shadow-[0px_12px_32px_rgba(25,28,29,0.04)] rounded-xl p-8 space-y-5">
         <div>
           <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
             Identitas
@@ -881,6 +896,24 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
           Mulai Ujian →
         </button>
       </form>
+
+      {showConfirmStart && (
+        <ConfirmModal
+          title="Mulai Ujian?"
+          icon="🚀"
+          onCancel={() => setShowConfirmStart(false)}
+          onConfirm={handleConfirmStart}
+          cancelText="Cek Lagi"
+          confirmText="Ya, Mulai!"
+          disabled={false}
+        >
+          <div className="text-gray-500 text-sm leading-relaxed space-y-2">
+            <p>Kamu akan memulai ujian sebagai:</p>
+            <p className="font-bold text-gray-900 text-base">{name.trim()}</p>
+            <p className="text-amber-600 text-xs font-medium mt-2">Pastikan nama sudah benar karena tidak bisa diubah setelah mulai.</p>
+          </div>
+        </ConfirmModal>
+      )}
     </div>
   )
 }
