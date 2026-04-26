@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/dal'
+import { getSession, getPermissions } from '@/lib/dal'
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
@@ -9,6 +9,15 @@ export async function POST(request, { params }) {
   }
 
   const { id: session_id } = await params
+
+  const perms = await getPermissions()
+  if (!perms.includes('manage_all_sessions')) {
+    const session = await prisma.session.findUnique({ where: { id: session_id }, select: { user_id: true } })
+    if (!session || session.user_id !== authSession.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
+
   const { text, type, options, correct_answer, order, timer_seconds, show_answers } = await request.json()
 
   if (!text?.trim()) {

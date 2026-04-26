@@ -67,6 +67,11 @@ model Session {
   shuffle_questions Boolean        @default(false)
   shuffle_options   Boolean        @default(false)
   quiz_mode         String         @default("one_by_one")
+  detect_tab_switch  Boolean       @default(true)
+  detect_window_blur Boolean       @default(false)
+  detect_devtools    Boolean       @default(false)
+  detect_page_leave  Boolean       @default(false)
+  detect_paste       Boolean       @default(false)
   created_at        DateTime       @default(now())
   user_id           String
   user              User           @relation(fields: [user_id], references: [id])
@@ -108,6 +113,7 @@ model Answer {
   session      Session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
   question     Question? @relation(fields: [question_id], references: [id], onDelete: SetNull)
 
+  @@unique([session_id, question_id, student_name], name: "unique_answer_per_question")
   @@map("answers")
 }
 
@@ -126,6 +132,7 @@ model TabViolation {
   session_id       String
   question_id      String?
   student_name     String?
+  type             String    @default("tab_hidden")
   left_at          DateTime
   returned_at      DateTime?
   duration_seconds Decimal?

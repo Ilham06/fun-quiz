@@ -104,6 +104,11 @@ export default async function SessionDetailPage({ params }) {
             initialShuffleQuestions={session.shuffle_questions ?? false}
             initialShuffleOptions={session.shuffle_options ?? false}
             initialQuizMode={session.quiz_mode ?? 'one_by_one'}
+            initialDetectTabSwitch={session.detect_tab_switch ?? true}
+            initialDetectWindowBlur={session.detect_window_blur ?? false}
+            initialDetectDevtools={session.detect_devtools ?? false}
+            initialDetectPageLeave={session.detect_page_leave ?? false}
+            initialDetectPaste={session.detect_paste ?? false}
           />
         )}
 

@@ -15,10 +15,12 @@ export default async function QuizPage({ params }) {
 
   if (!session) notFound()
 
-  const questions = await prisma.question.findMany({
+  const rawQuestions = await prisma.question.findMany({
     where: { session_id: session.id },
     orderBy: { order: 'asc' },
   })
+
+  const questions = rawQuestions.map(({ correct_answer, ...q }) => q)
 
   const theme = getThemeConfig(session.theme)
 

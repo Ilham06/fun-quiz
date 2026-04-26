@@ -42,9 +42,12 @@ function TabWarningBanner({ count }) {
   )
 }
 
-function useTabDetection({ sessionId, studentName, questionId, enabled }) {
+function useViolationDetection({ sessionId, studentName, questionId, enabled, detect }) {
   const [violationCount, setViolationCount] = useState(0)
-  const leftAtRef = useRef(null)
+  const tabHiddenAtRef = useRef(null)
+  const blurAtRef = useRef(null)
+  const lastWidthRef = useRef(typeof window !== 'undefined' ? window.innerWidth : 0)
+  const lastHeightRef = useRef(typeof window !== 'undefined' ? window.innerHeight : 0)
 
   useEffect(() => {
     if (!enabled) return
@@ -55,9 +58,19 @@ function useTabDetection({ sessionId, studentName, questionId, enabled }) {
   useEffect(() => {
     if (!enabled) return
 
-    function reportViolation(leftAt, returnedAt) {
+    const {
+      tabSwitch = true,
+      windowBlur = false,
+      devtools = false,
+      pageLeave = false,
+      paste = false,
+    } = detect || {}
+
+    if (!tabSwitch && !windowBlur && !devtools && !pageLeave && !paste) return
+
+    function reportViolation(leftAt, returnedAt, type) {
       const durationSeconds = (returnedAt - leftAt) / 1000
-      if (durationSeconds < 0.5) return
+      if (durationSeconds < 0.5 && type !== 'devtools_open' && type !== 'page_leave' && type !== 'external_paste') return
 
       setViolationCount(prev => {
         const next = prev + 1
@@ -72,43 +85,127 @@ function useTabDetection({ sessionId, studentName, questionId, enabled }) {
           session_id: sessionId,
           question_id: questionId || null,
           student_name: studentName || null,
+          type,
           left_at: new Date(leftAt).toISOString(),
           returned_at: new Date(returnedAt).toISOString(),
-          duration_seconds: Math.round(durationSeconds * 10) / 10,
+          duration_seconds: Math.max(0, Math.round(durationSeconds * 10) / 10),
+        }),
+      }).catch(() => {})
+    }
+
+    function reportInstant(type) {
+      setViolationCount(prev => {
+        const next = prev + 1
+        sessionStorage.setItem(`exam-${sessionId}-violations`, String(next))
+        return next
+      })
+
+      const now = new Date().toISOString()
+      fetch('/api/tab-violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          question_id: questionId || null,
+          student_name: studentName || null,
+          type,
+          left_at: now,
+          returned_at: now,
+          duration_seconds: 0,
         }),
       }).catch(() => {})
     }
 
     function handleVisibilityChange() {
       if (document.hidden) {
-        leftAtRef.current = Date.now()
-      } else if (leftAtRef.current) {
-        reportViolation(leftAtRef.current, Date.now())
-        leftAtRef.current = null
+        tabHiddenAtRef.current = Date.now()
+        blurAtRef.current = null
+      } else if (tabHiddenAtRef.current) {
+        if (tabSwitch) {
+          reportViolation(tabHiddenAtRef.current, Date.now(), 'tab_hidden')
+        }
+        tabHiddenAtRef.current = null
       }
     }
 
     function handleBlur() {
-      if (!leftAtRef.current) leftAtRef.current = Date.now()
+      if (tabHiddenAtRef.current) return
+      if (!blurAtRef.current) blurAtRef.current = Date.now()
     }
 
     function handleFocus() {
-      if (leftAtRef.current) {
-        reportViolation(leftAtRef.current, Date.now())
-        leftAtRef.current = null
+      if (tabHiddenAtRef.current) return
+      if (blurAtRef.current) {
+        if (windowBlur) {
+          reportViolation(blurAtRef.current, Date.now(), 'window_blur')
+        }
+        blurAtRef.current = null
+      }
+    }
+
+    function handleResize() {
+      if (!devtools) return
+      const widthDiff = Math.abs(window.outerWidth - window.innerWidth)
+      const heightDiff = Math.abs(window.outerHeight - window.innerHeight)
+      const threshold = 160
+
+      const wasNarrow = lastWidthRef.current < threshold && lastHeightRef.current < threshold
+      const isWide = widthDiff > threshold || heightDiff > threshold
+
+      if (!wasNarrow && isWide) {
+        reportInstant('devtools_open')
+      }
+
+      lastWidthRef.current = widthDiff
+      lastHeightRef.current = heightDiff
+    }
+
+    function handleBeforeUnload() {
+      if (!pageLeave) return
+      const now = new Date().toISOString()
+      const data = JSON.stringify({
+        session_id: sessionId,
+        question_id: questionId || null,
+        student_name: studentName || null,
+        type: 'page_leave',
+        left_at: now,
+        returned_at: now,
+        duration_seconds: 0,
+      })
+      navigator.sendBeacon('/api/tab-violations', new Blob([data], { type: 'application/json' }))
+    }
+
+    function handlePaste(e) {
+      if (!paste) return
+      const clipboardData = e.clipboardData || window.clipboardData
+      if (!clipboardData) return
+      const text = clipboardData.getData('text')
+      if (text && text.length > 3) {
+        reportInstant('external_paste')
       }
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('blur', handleBlur)
     window.addEventListener('focus', handleFocus)
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('paste', handlePaste)
+
+    if (devtools) {
+      lastWidthRef.current = Math.abs(window.outerWidth - window.innerWidth)
+      lastHeightRef.current = Math.abs(window.outerHeight - window.innerHeight)
+    }
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('blur', handleBlur)
       window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('paste', handlePaste)
     }
-  }, [enabled, sessionId, studentName, questionId])
+  }, [enabled, sessionId, studentName, questionId, detect])
 
   return violationCount
 }
@@ -189,11 +286,18 @@ function OneByOneExam({ session, questions, theme }) {
   const isFinished = currentIndex >= shuffledQuestions.length
   const totalQuestions = shuffledQuestions.length
 
-  const violationCount = useTabDetection({
+  const violationCount = useViolationDetection({
     sessionId: session.id,
     studentName: name,
     questionId: currentQuestion?.id,
     enabled: started && !isFinished,
+    detect: {
+      tabSwitch: session.detect_tab_switch !== false,
+      windowBlur: session.detect_window_blur === true,
+      devtools: session.detect_devtools === true,
+      pageLeave: session.detect_page_leave === true,
+      paste: session.detect_paste === true,
+    },
   })
 
   useEffect(() => {
@@ -219,10 +323,27 @@ function OneByOneExam({ session, questions, theme }) {
     }))
   }, [session.id])
 
-  function handleStart(e) {
+  async function handleStart(e) {
     e.preventDefault()
     if (!name.trim()) return
     sessionStorage.setItem(`exam-${session.id}-name`, name.trim())
+
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_name: name.trim() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.hasAnswers) {
+          setCurrentIndex(questions.length)
+          setStarted(true)
+          return
+        }
+      }
+    } catch {}
+
     setStarted(true)
   }
 
@@ -253,7 +374,7 @@ function OneByOneExam({ session, questions, theme }) {
       }),
     })
 
-    if (res.ok) {
+    if (res.ok || res.status === 409) {
       const newAnswered = new Set(answeredIds)
       newAnswered.add(currentQuestion.id)
       setAnsweredIds(newAnswered)
@@ -497,11 +618,18 @@ function AllAtOnceExam({ session, questions, theme }) {
   const totalQuestions = shuffledQuestions.length
   const answeredCount = Object.keys(studentAnswers).length
 
-  const violationCount = useTabDetection({
+  const violationCount = useViolationDetection({
     sessionId: session.id,
     studentName: name,
     questionId: null,
     enabled: started && !isFinished,
+    detect: {
+      tabSwitch: session.detect_tab_switch !== false,
+      windowBlur: session.detect_window_blur === true,
+      devtools: session.detect_devtools === true,
+      pageLeave: session.detect_page_leave === true,
+      paste: session.detect_paste === true,
+    },
   })
 
   useEffect(() => {
@@ -527,10 +655,28 @@ function AllAtOnceExam({ session, questions, theme }) {
     }))
   }, [session.id])
 
-  function handleStart(e) {
+  async function handleStart(e) {
     e.preventDefault()
     if (!name.trim()) return
     sessionStorage.setItem(`exam-${session.id}-name`, name.trim())
+
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_name: name.trim() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.hasAnswers) {
+          setIsFinished(true)
+          saveProgress(studentAnswers, openAnswers, true)
+          setStarted(true)
+          return
+        }
+      }
+    } catch {}
+
     setStarted(true)
   }
 
@@ -591,8 +737,8 @@ function AllAtOnceExam({ session, questions, theme }) {
 
     try {
       const results = await Promise.all(promises)
-      const allOk = results.every(r => r.ok)
-      if (allOk) {
+      const allAccepted = results.every(r => r.ok || r.status === 409)
+      if (allAccepted) {
         setIsFinished(true)
         saveProgress(studentAnswers, openAnswers, true)
       } else {
@@ -835,6 +981,7 @@ function EmptyState() {
 
 function StartScreen({ session, name, setName, onStart, totalQuestions, questions, allAtOnce }) {
   const [showConfirmStart, setShowConfirmStart] = useState(false)
+  const [starting, setStarting] = useState(false)
 
   function handleFormSubmit(e) {
     e.preventDefault()
@@ -842,9 +989,11 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
     setShowConfirmStart(true)
   }
 
-  function handleConfirmStart() {
+  async function handleConfirmStart() {
+    setStarting(true)
     setShowConfirmStart(false)
-    onStart({ preventDefault: () => {} })
+    await onStart({ preventDefault: () => {} })
+    setStarting(false)
   }
 
   return (
@@ -891,9 +1040,10 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
         </div>
         <button
           type="submit"
-          className="w-full bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-md text-lg"
+          disabled={starting}
+          className="w-full bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-md text-lg disabled:opacity-50"
         >
-          Mulai Quiz →
+          {starting ? 'Memulai...' : 'Mulai Quiz →'}
         </button>
       </form>
 
@@ -905,7 +1055,7 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
           onConfirm={handleConfirmStart}
           cancelText="Cek Lagi"
           confirmText="Ya, Mulai!"
-          disabled={false}
+          disabled={starting}
         >
           <div className="text-gray-500 text-sm leading-relaxed space-y-2">
             <p>Kamu akan memulai quiz sebagai:</p>
@@ -919,10 +1069,32 @@ function StartScreen({ session, name, setName, onStart, totalQuestions, question
 }
 
 function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredIds, totalQuestions, violationCount, name }) {
-  const scorableQuestions = shuffledQuestions.filter(q => q.correct_answer)
-  const correctCount = scorableQuestions.filter(q => studentAnswers[q.id] === q.correct_answer).length
-  const hasScore = scorableQuestions.length > 0
-  const scorePercent = hasScore ? Math.round((correctCount / scorableQuestions.length) * 100) : 0
+  const [scoreData, setScoreData] = useState(null)
+  const [scoreLoading, setScoreLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchScore() {
+      try {
+        const res = await fetch(`/api/sessions/${session.id}/score`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_name: name.trim() }),
+        })
+        if (res.ok && !cancelled) {
+          setScoreData(await res.json())
+        }
+      } catch {}
+      if (!cancelled) setScoreLoading(false)
+    }
+    fetchScore()
+    return () => { cancelled = true }
+  }, [session.id, name])
+
+  const hasScore = scoreData && scoreData.totalScorable > 0
+  const correctCount = scoreData?.correctCount ?? 0
+  const totalScorable = scoreData?.totalScorable ?? 0
+  const scorePercent = scoreData?.scorePercent ?? 0
   const gaugeArc = 157
   const gaugeFilled = hasScore ? (gaugeArc * scorePercent) / 100 : 0
 
@@ -937,6 +1109,11 @@ function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredId
           : scorePercent > 0
             ? 'Jangan menyerah, terus belajar lagi!'
             : 'SERIUS GADA YANG BENAR SAMA SEKALI?'
+
+  const detailsMap = {}
+  if (scoreData?.details) {
+    for (const d of scoreData.details) detailsMap[d.text] = d
+  }
 
   return (
     <div className="animate-fade-up relative">
@@ -967,7 +1144,12 @@ function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredId
         </section>
 
         <article className="w-full max-w-2xl bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-8 md:p-10 border border-gray-50">
-          {hasScore && (
+          {scoreLoading ? (
+            <div className="flex flex-col items-center py-12">
+              <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-gray-400 text-sm">Menghitung skor...</p>
+            </div>
+          ) : hasScore ? (
             <div className="flex flex-col items-center mb-12">
               <div className="relative w-[200px] h-[100px] overflow-hidden mb-2">
                 <svg width="200" height="100" viewBox="0 0 120 60">
@@ -983,85 +1165,86 @@ function FinishedScreen({ session, shuffledQuestions, studentAnswers, answeredId
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
                   <span className="text-4xl font-extrabold text-slate-800">
-                    {correctCount}<span className="text-2xl text-gray-300 mx-1">/</span>{scorableQuestions.length}
+                    {correctCount}<span className="text-2xl text-gray-300 mx-1">/</span>{totalScorable}
                   </span>
                   <span className="text-sm font-bold text-amber-500 mt-1">{scorePercent}%</span>
                 </div>
               </div>
               <p className="text-lg font-bold text-slate-800 mt-4">{feedbackText}</p>
             </div>
-          )}
+          ) : null}
 
-          <div className="space-y-4 mb-10">
-            <h2 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Detail Jawaban</h2>
-            {shuffledQuestions.map((q, i) => {
-              const myAnswer = studentAnswers[q.id]
-              const hasCorrect = !!q.correct_answer
-              const isCorrect = hasCorrect && myAnswer === q.correct_answer
-              const isWrong = hasCorrect && myAnswer && !isCorrect
+          {!scoreLoading && scoreData?.details && (
+            <div className="space-y-4 mb-10">
+              <h2 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Detail Jawaban</h2>
+              {scoreData.details.map((d) => {
+                const hasCorrect = d.isCorrect !== null
+                const isCorrect = d.isCorrect === true
+                const isWrong = hasCorrect && d.myAnswer && !isCorrect
 
-              return (
-                <div
-                  key={q.id}
-                  className={`rounded-xl p-4 flex gap-4 items-start ${
-                    !hasCorrect
-                      ? 'bg-gray-50 border border-gray-100'
-                      : isCorrect
-                        ? 'bg-green-50/50 border border-green-100 shadow-sm'
-                        : 'bg-red-50/50 border border-red-100 shadow-sm'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold ${
-                    !hasCorrect
-                      ? 'bg-gray-200 text-gray-500'
-                      : isCorrect
-                        ? 'bg-green-500/10 text-green-600'
-                        : 'bg-red-500/10 text-red-500'
-                  }`}>
-                    {i + 1}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-800 mb-1">{q.text}</p>
-                    {myAnswer ? (
-                      <>
-                        <p className={`text-[11px] font-medium ${
-                          !hasCorrect
-                            ? 'text-gray-500'
-                            : isCorrect
-                              ? 'text-green-600'
-                              : 'text-red-500'
-                        }`}>
-                          Jawaban: {myAnswer} {isWrong && '✗'}
-                        </p>
-                        {hasCorrect && !isCorrect && (
-                          <p className="text-[11px] text-green-600 font-medium">Jawaban benar: {q.correct_answer}</p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-gray-400">Tidak dijawab</p>
-                    )}
-                  </div>
-
-                  {hasCorrect && myAnswer && (
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                      isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
+                return (
+                  <div
+                    key={d.index}
+                    className={`rounded-xl p-4 flex gap-4 items-start ${
+                      !hasCorrect
+                        ? 'bg-gray-50 border border-gray-100'
+                        : isCorrect
+                          ? 'bg-green-50/50 border border-green-100 shadow-sm'
+                          : 'bg-red-50/50 border border-red-100 shadow-sm'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold ${
+                      !hasCorrect
+                        ? 'bg-gray-200 text-gray-500'
+                        : isCorrect
+                          ? 'bg-green-500/10 text-green-600'
+                          : 'bg-red-500/10 text-red-500'
                     }`}>
-                      {isCorrect ? (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-                        </svg>
+                      {d.index}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-800 mb-1">{d.text}</p>
+                      {d.myAnswer ? (
+                        <>
+                          <p className={`text-[11px] font-medium ${
+                            !hasCorrect
+                              ? 'text-gray-500'
+                              : isCorrect
+                                ? 'text-green-600'
+                                : 'text-red-500'
+                          }`}>
+                            Jawaban: {d.myAnswer} {isWrong && '✗'}
+                          </p>
+                          {d.correctAnswer && (
+                            <p className="text-[11px] text-green-600 font-medium">Jawaban benar: {d.correctAnswer}</p>
+                          )}
+                        </>
                       ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-                        </svg>
+                        <p className="text-[11px] text-gray-400">Tidak dijawab</p>
                       )}
                     </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+
+                    {hasCorrect && d.myAnswer && (
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                        isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
+                      }`}>
+                        {isCorrect ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+                          </svg>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
           {violationCount > 0 && (
             <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 text-center">
