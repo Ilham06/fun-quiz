@@ -13,10 +13,15 @@ function Toggle({ enabled }) {
   )
 }
 
-export default function ShuffleSettings({ sessionId, initialShuffleQuestions, initialShuffleOptions, initialQuizMode }) {
+export default function ShuffleSettings({ sessionId, initialShuffleQuestions, initialShuffleOptions, initialQuizMode, initialDetectTabSwitch, initialDetectWindowBlur, initialDetectDevtools, initialDetectPageLeave, initialDetectPaste }) {
   const [shuffleQ, setShuffleQ] = useState(initialShuffleQuestions)
   const [shuffleO, setShuffleO] = useState(initialShuffleOptions)
   const [quizMode, setQuizMode] = useState(initialQuizMode || 'one_by_one')
+  const [detectTab, setDetectTab] = useState(initialDetectTabSwitch !== false)
+  const [detectBlur, setDetectBlur] = useState(initialDetectWindowBlur === true)
+  const [detectDevtools, setDetectDevtools] = useState(initialDetectDevtools === true)
+  const [detectPageLeave, setDetectPageLeave] = useState(initialDetectPageLeave === true)
+  const [detectPaste, setDetectPaste] = useState(initialDetectPaste === true)
   const [saving, setSaving] = useState(false)
 
   async function toggle(field, current, setter) {
@@ -139,6 +144,76 @@ export default function ShuffleSettings({ sessionId, initialShuffleQuestions, in
                 <p className="text-[11px] text-gray-400">Opsi A/B/C/D diacak untuk pilihan ganda</p>
               </div>
               <Toggle enabled={shuffleO} />
+            </button>
+          </div>
+        </div>
+
+        <div className="border-t border-amber-200/40 pt-3">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Deteksi Kecurangan</p>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => toggle('detect_tab_switch', detectTab, setDetectTab)}
+              disabled={saving}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-amber-200 transition-all disabled:opacity-50"
+            >
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800">Deteksi Pindah Tab</p>
+                <p className="text-[11px] text-gray-400">Catat saat mahasiswa pindah tab atau minimize browser</p>
+              </div>
+              <Toggle enabled={detectTab} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggle('detect_window_blur', detectBlur, setDetectBlur)}
+              disabled={saving}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-amber-200 transition-all disabled:opacity-50"
+            >
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800">Deteksi Pindah Aplikasi</p>
+                <p className="text-[11px] text-gray-400">Catat saat mahasiswa klik ke luar jendela browser</p>
+              </div>
+              <Toggle enabled={detectBlur} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggle('detect_devtools', detectDevtools, setDetectDevtools)}
+              disabled={saving}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-amber-200 transition-all disabled:opacity-50"
+            >
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800">Deteksi Buka DevTools</p>
+                <p className="text-[11px] text-gray-400">Catat saat mahasiswa membuka Developer Tools (F12)</p>
+              </div>
+              <Toggle enabled={detectDevtools} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggle('detect_page_leave', detectPageLeave, setDetectPageLeave)}
+              disabled={saving}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-amber-200 transition-all disabled:opacity-50"
+            >
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800">Deteksi Refresh / Tutup Halaman</p>
+                <p className="text-[11px] text-gray-400">Catat saat mahasiswa refresh atau menutup halaman quiz</p>
+              </div>
+              <Toggle enabled={detectPageLeave} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggle('detect_paste', detectPaste, setDetectPaste)}
+              disabled={saving}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-amber-200 transition-all disabled:opacity-50"
+            >
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800">Deteksi Copy-Paste</p>
+                <p className="text-[11px] text-gray-400">Catat saat mahasiswa paste teks dari luar ke jawaban</p>
+              </div>
+              <Toggle enabled={detectPaste} />
             </button>
           </div>
         </div>

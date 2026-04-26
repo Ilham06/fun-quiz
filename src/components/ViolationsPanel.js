@@ -38,6 +38,14 @@ export default function ViolationsPanel({ violations, questions }) {
     return `${Math.floor(secs / 60)}m ${Math.round(secs % 60)}s`
   }
 
+  const TYPE_LABELS = {
+    tab_hidden: { label: 'Pindah Tab', color: 'bg-red-100 text-red-600' },
+    window_blur: { label: 'Pindah App', color: 'bg-orange-100 text-orange-600' },
+    devtools_open: { label: 'Buka DevTools', color: 'bg-purple-100 text-purple-600' },
+    page_leave: { label: 'Refresh/Tutup', color: 'bg-blue-100 text-blue-600' },
+    external_paste: { label: 'Copy-Paste', color: 'bg-yellow-100 text-yellow-700' },
+  }
+
   return (
     <section className="bg-red-50 border border-red-100 rounded-2xl p-5">
       <div className="flex items-center text-red-800 font-bold text-sm mb-4">
@@ -75,18 +83,24 @@ export default function ViolationsPanel({ violations, questions }) {
 
             {expanded === s.name && (
               <div className="ml-4 mt-1 space-y-1 mb-2">
-                {s.violations.map((v) => (
-                  <div key={v.id} className="bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3 text-xs">
-                    <span className="text-gray-400">{getQuestionLabel(v.question_id)}</span>
-                    <span className="text-gray-500">
-                      {new Date(v.left_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      {v.returned_at && (
-                        <> → {new Date(v.returned_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</>
-                      )}
-                    </span>
-                    <span className="text-red-500 ml-auto font-medium">{formatDuration(v.duration_seconds)}</span>
-                  </div>
-                ))}
+                {s.violations.map((v) => {
+                  const typeMeta = TYPE_LABELS[v.type] || TYPE_LABELS.tab_hidden
+                  return (
+                    <div key={v.id} className="bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3 text-xs">
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${typeMeta.color}`}>
+                        {typeMeta.label}
+                      </span>
+                      <span className="text-gray-400">{getQuestionLabel(v.question_id)}</span>
+                      <span className="text-gray-500">
+                        {new Date(v.left_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        {v.returned_at && (
+                          <> → {new Date(v.returned_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</>
+                        )}
+                      </span>
+                      <span className="text-red-500 ml-auto font-medium">{formatDuration(v.duration_seconds)}</span>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
